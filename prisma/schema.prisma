@@ -1,0 +1,298 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Role {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  users     User[]
+  createdAt DateTime @default(now())
+}
+
+model Branch {
+  id        Int      @id @default(autoincrement())
+  name      String
+  location  String?
+  phone     String?
+  users     User[]
+  members Member[]//add 
+   memberAttendances MemberAttendance[]//add
+  staffAttendances  StaffAttendance[]//add
+   classSchedules   ClassSchedule[] //add
+   alerts Alert[]//add
+   expense Expense[]//add
+   products Product[]//add
+
+  createdAt DateTime @default(now())
+
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  fullName  String
+  email     String   @unique
+  password  String
+  phone     String?
+  roleId    Int
+  branchId  Int?
+  role      Role     @relation(fields: [roleId], references: [id])
+  branch    Branch?  @relation(fields: [branchId], references: [id])
+
+  staffAttendances StaffAttendance[]//add
+   classSchedules   ClassSchedule[] //add
+   alerts Alert[]//add
+
+  createdAt DateTime @default(now())
+}
+
+
+
+model Member {
+  id             Int       @id @default(autoincrement())
+  fullName       String
+  email          String?   @unique
+  phone          String
+  gender         String?
+  age            Int?
+  address        String?
+  joinDate       DateTime  @default(now())
+  branchId       Int
+  planId         Int?
+  membershipFrom DateTime?
+  membershipTo   DateTime?
+
+  branch Branch  @relation(fields: [branchId], references: [id])
+  plan   Plan?   @relation(fields: [planId], references: [id])
+
+   attendances MemberAttendance[]//add
+   bookings     Booking[]  //add    
+   payments  Payment[]//add
+   alerts Alert[]//add
+   dietPlanAssignments DietPlanAssignment[]   // 🔥 new
+workoutPlanAssignments WorkoutPlanAssignment[]  // 🔥 new
+notificationLog  NotificationLog[]//add 
+
+}
+
+model Plan {
+  id        Int      @id @default(autoincrement())
+  name      String
+  duration  Int      // number of days
+  price     Float
+  createdAt DateTime @default(now())
+  members   Member[]
+  payments  Payment[]
+}
+
+
+model MemberAttendance {
+  id         Int       @id @default(autoincrement())
+  memberId   Int
+  branchId   Int
+  checkIn    DateTime  @default(now())
+  checkOut   DateTime?
+
+  member     Member    @relation(fields: [memberId], references: [id])
+  branch     Branch    @relation(fields: [branchId], references: [id])
+}
+
+
+model StaffAttendance {
+  id         Int       @id @default(autoincrement())
+  staffId    Int
+  branchId   Int
+  checkIn    DateTime  @default(now())
+  checkOut   DateTime?
+
+  staff      User      @relation(fields: [staffId], references: [id])
+  branch     Branch    @relation(fields: [branchId], references: [id])
+}
+
+model ClassType {
+  id        Int       @id @default(autoincrement())
+  name      String
+  createdAt DateTime  @default(now())
+  schedules ClassSchedule[]
+}
+
+model ClassSchedule {
+  id          Int       @id @default(autoincrement())
+  branchId    Int
+  classTypeId Int
+  trainerId   Int
+  date        DateTime
+  startTime   DateTime
+  endTime     DateTime
+  capacity    Int
+
+  classType   ClassType   @relation(fields: [classTypeId], references: [id])
+  trainer     User        @relation(fields: [trainerId], references: [id])
+  branch      Branch      @relation(fields: [branchId], references: [id])
+  bookings    Booking[]
+}
+
+model Booking {
+  id         Int      @id @default(autoincrement())
+  memberId   Int
+  scheduleId Int
+  createdAt  DateTime @default(now())
+
+  member     Member        @relation(fields: [memberId], references: [id])
+  schedule   ClassSchedule @relation(fields: [scheduleId], references: [id])
+}
+
+
+
+model Payment {
+  id          Int       @id @default(autoincrement())
+  memberId    Int
+  planId      Int
+  amount      Float
+  paymentDate DateTime  @default(now())
+  invoiceNo   String    @unique
+
+  member Member @relation(fields: [memberId], references: [id])
+  plan   Plan   @relation(fields: [planId], references: [id])
+
+  gstPercent Float?  // example: 18
+gstAmount  Float?  // example: calculated tax
+
+}
+
+
+model Alert {
+  id        Int      @id @default(autoincrement())
+  type      String   // EXPIRING, EXPIRED, NO_PAYMENT, NO_CHECKIN, STAFF_ABSENT
+  message   String
+  memberId  Int?
+  staffId   Int?
+  branchId  Int
+  createdAt DateTime @default(now())
+
+  member    Member? @relation(fields: [memberId], references: [id])
+  staff     User?   @relation(fields: [staffId], references: [id])
+  branch    Branch  @relation(fields: [branchId], references: [id])
+}
+
+
+model Expense {
+  id        Int      @id @default(autoincrement())
+  title     String
+  category  String
+  amount    Float
+  date      DateTime @default(now())
+  branchId  Int
+  notes     String?
+  createdAt DateTime @default(now())
+
+  branch Branch @relation(fields: [branchId], references: [id])
+}
+
+model DietPlan {
+  id        Int       @id @default(autoincrement())
+  title     String
+  notes     String?
+  createdBy Int
+  branchId  Int
+  createdAt DateTime @default(now())
+
+  meals     DietMeal[]
+  memberPlans DietPlanAssignment[]
+}
+
+model DietMeal {
+  id        Int      @id @default(autoincrement())
+  dietPlanId Int
+  time      String
+  food      String
+
+  dietPlan DietPlan @relation(fields: [dietPlanId], references: [id])
+}
+
+model DietPlanAssignment {
+  id         Int      @id @default(autoincrement())
+  dietPlanId Int
+  memberId   Int
+  assignedAt DateTime @default(now())
+
+  dietPlan DietPlan @relation(fields: [dietPlanId], references: [id])
+  member   Member   @relation(fields: [memberId], references: [id])
+}
+
+model WorkoutPlan {
+  id        Int       @id @default(autoincrement())
+  title     String
+  notes     String?
+  createdBy Int
+  branchId  Int
+  createdAt DateTime @default(now())
+
+  exercises WorkoutExercise[]
+  memberPlans WorkoutPlanAssignment[]
+}
+
+model WorkoutExercise {
+  id          Int      @id @default(autoincrement())
+  workoutPlanId Int
+  name        String
+  sets        Int?
+  reps        Int?
+  duration    String? // example: 30 mins
+
+  workoutPlan WorkoutPlan @relation(fields: [workoutPlanId], references: [id])
+}
+
+model WorkoutPlanAssignment {
+  id           Int      @id @default(autoincrement())
+  workoutPlanId Int
+  memberId     Int
+  assignedAt   DateTime @default(now())
+
+  workoutPlan WorkoutPlan @relation(fields: [workoutPlanId], references: [id])
+  member      Member      @relation(fields: [memberId], references: [id])
+}
+
+
+model NotificationLog {
+  id        Int      @id @default(autoincrement())
+  type      String   // WHATSAPP / EMAIL / SMS
+  to        String
+  message   String
+  status    String   @default("PENDING")
+  createdAt DateTime @default(now())
+  memberId  Int?
+
+  member    Member? @relation(fields: [memberId], references: [id])
+}
+
+model Product {
+  id            Int              @id @default(autoincrement())
+  name          String
+  sku           String?          @unique
+  category      String?
+  sellingPrice  Float
+  costPrice     Float?
+  currentStock  Int              @default(0)
+  branchId      Int
+  isActive      Boolean          @default(true)
+  createdAt     DateTime         @default(now())
+
+  branch        Branch           @relation(fields: [branchId], references: [id])
+  movements     StockMovement[]
+}
+
+model StockMovement {
+  id         Int       @id @default(autoincrement())
+  productId  Int
+  type       String    // PURCHASE / SALE / ADJUSTMENT
+  quantity   Int       // +ve for IN, -ve for OUT
+  note       String?
+  createdAt  DateTime  @default(now())
+
+  product    Product   @relation(fields: [productId], references: [id])
+}

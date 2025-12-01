@@ -1,0 +1,32 @@
+{
+  "name": "gym-backend",
+  "version": "1.0.0",
+  "description": "Simple Gym backend scaffold (Express + Prisma)",
+  "main": "src/server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "cors": "^2.8.5",
+    "date-fns": "^4.1.0",
+    "dotenv": "^16.6.1",
+    "express": "^4.21.2",
+    "ioredis": "^5.8.2",
+    "jsonwebtoken": "^9.0.2",
+    "morgan": "^1.10.1",
+    "node-cron": "^4.2.1",
+    "nodemailer": "^7.0.11",
+    "pdfkit": "^0.17.2"
+  },
+  "devDependencies": {
+    "@prisma/client": "^5.16.0",
+    "nodemon": "^2.0.22",
+    "prisma": "^5.16.0"
+  }
+}
