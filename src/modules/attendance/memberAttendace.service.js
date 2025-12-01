@@ -12,10 +12,10 @@ export const memberCheckInService = async (memberId, branchId) => {
 
   const now = new Date();
 
-  // membership validity check
+  // membership validity check    
   if (now < member.membershipFrom || now > member.membershipTo)
     throw { status: 400, message: "Membership expired or not active" };
-
+  
   // prevent double check-in
   const active = await prisma.memberAttendance.findFirst({
     where: { memberId, checkOut: null },

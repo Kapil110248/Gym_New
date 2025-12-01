@@ -7,7 +7,13 @@ export const createPlanService = async (data) => {
 
   if (exists) throw { status: 400, message: "Plan name already exists" };
 
-  const plan = await prisma.plan.create({ data });
+  // Ensure status defaults to ACTIVE if not provided
+  const plan = await prisma.plan.create({
+    data: {
+      ...data,
+      status: data.status || "ACTIVE"
+    }
+  });
   return plan;
 };
 
@@ -20,7 +26,7 @@ export const listPlansService = async () => {
 export const updatePlanService = async (id, data) => {
   const plan = await prisma.plan.update({
     where: { id },
-    data,
+    data
   });
 
   return plan;
@@ -28,6 +34,6 @@ export const updatePlanService = async (id, data) => {
 
 export const deletePlanService = async (id) => {
   return prisma.plan.delete({
-    where: { id },
-  });
+    where: { id },
+  });
 };

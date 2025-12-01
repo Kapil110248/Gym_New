@@ -9,6 +9,12 @@ export const createMemberService = async (data) => {
   });
   if (exists) throw { status: 400, message: "Member already exists" };
 
+
+
+data.membershipFrom = new Date(data.membershipFrom);
+data.membershipTo = new Date(data.membershipTo);
+
+
   const member = await prisma.member.create({
     data,
     include: { plan: true, branch: true },

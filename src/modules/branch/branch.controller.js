@@ -18,5 +18,5 @@ export const listBranches = async (req, res, next) => {
     res.json({ success: true, branches });
   } catch (err) {
     next(err);
-  }
+  }  
 };

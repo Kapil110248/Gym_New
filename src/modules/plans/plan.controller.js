@@ -11,9 +11,8 @@ export const createPlan = async (req, res, next) => {
     res.json({ success: true, plan });
   } catch (err) {
     next(err);
-  }
+  }
 };
-
 export const listPlans = async (req, res, next) => {
   try {
     const plans = await listPlansService();

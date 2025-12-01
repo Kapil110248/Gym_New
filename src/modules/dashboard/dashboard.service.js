@@ -5,62 +5,82 @@ export const dashboardService = async () => {
   const today = new Date();
   const monthStart = startOfMonth(today);
 
-  const totalRevenue = await prisma.payment.aggregate({
+  // Total Revenue
+  const totalRevenueAgg = await prisma.payment.aggregate({
     _sum: { amount: true }
   });
+  const totalRevenue = Number(totalRevenueAgg._sum.amount || 0);
 
+  // New Members This Month
   const newMembers = await prisma.member.count({
-    where: { createdAt: { gte: monthStart } }
+    where: { joinDate: { gte: monthStart } }
   });
 
+  // Active Members = membership not expired
   const activeMembers = await prisma.member.count({
-    where: { status: "ACTIVE" }
+    where: { membershipTo: { gte: today } }
   });
 
-  const checkIns = await prisma.attendance.count({
-    where: { createdAt: { gte: monthStart } }
+  // Check-ins This Month
+  const checkIns = await prisma.memberAttendance.count({
+    where: { checkIn: { gte: monthStart } }
   });
 
-  const ptRevenue = await prisma.payment.aggregate({
-    where: { plan: { category: "PT" } },
+  // PT Revenue
+  const ptRevenueAgg = await prisma.payment.aggregate({
+    where: { plan: { is: { category: "PT" } } },
     _sum: { amount: true }
   });
+  const ptRevenue = Number(ptRevenueAgg._sum.amount || 0);
 
+  // Overdue Members = membership expired
   const arOverdue = await prisma.member.count({
-    where: { expiryDate: { lt: today } }
+    where: { membershipTo: { lt: today } }
   });
 
-  // chart: revenue graph for month
-  const revenueGraph = await prisma.$queryRaw`
+  // Revenue Graph
+  let revenueGraph = await prisma.$queryRaw`
       SELECT DATE(paymentDate) AS day, SUM(amount) AS revenue
       FROM Payment
       WHERE paymentDate >= ${monthStart}
       GROUP BY DATE(paymentDate)
       ORDER BY DATE(paymentDate)
   `;
+  revenueGraph = revenueGraph.map(r => ({
+    day: r.day,
+    revenue: Number(r.revenue)
+  }));
 
-  // branch leaderboard: revenue + new members
-  const branchLeaderboard = await prisma.$queryRaw`
+  // Branch Leaderboard
+  let branchLeaderboard = await prisma.$queryRaw`
       SELECT 
          b.name AS branch,
          COALESCE(SUM(p.amount), 0) AS revenue,
          COUNT(m.id) AS new
       FROM Branch b
-      LEFT JOIN Member m ON m.branchId = b.id AND m.createdAt >= ${monthStart}
-      LEFT JOIN Payment p ON p.memberId = m.id
+      LEFT JOIN Member m 
+          ON m.branchId = b.id 
+         AND m.joinDate >= ${monthStart}
+      LEFT JOIN Payment p 
+          ON p.memberId = m.id
       GROUP BY b.id
       ORDER BY revenue DESC
   `;
+  branchLeaderboard = branchLeaderboard.map(b => ({
+    branch: b.branch,
+    revenue: Number(b.revenue),
+    new: Number(b.new)
+  }));
 
   return {
-    totalRevenue: totalRevenue._sum.amount || 0,
+    totalRevenue,
     newMembers,
     activeMembers,
     checkIns,
-    ptRevenue: ptRevenue._sum.amount || 0,
+    ptRevenue,
     arOverdue,
     revenueGraph,
     branchLeaderboard,
-    dashboardAlerts: [] // Alerts will be added later (Step 11B)
+    dashboardAlerts: []
   };
 };

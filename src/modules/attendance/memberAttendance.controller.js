@@ -7,19 +7,42 @@ import {
   staffAttendanceListService,
 } from "./memberAttendace.service.js";
 
+// export const memberCheckIn = async (req, res, next) => {
+//   try {
+//     const { memberId, branchId } = req.body;
+//     const r = await memberCheckInService(memberId, branchId);
+//     res.json({ success: true, attendance: r });
+//   } catch (err) {
+//     next(err);
+//   }
+// };
+
 export const memberCheckIn = async (req, res, next) => {
   try {
-    const { memberId, branchId } = req.body;
+    const memberId = req.user.memberId; // token se
+    const branchId = req.user.branchId; // token se
+
     const r = await memberCheckInService(memberId, branchId);
+
     res.json({ success: true, attendance: r });
   } catch (err) {
     next(err);
   }
 };
 
+// export const memberCheckOut = async (req, res, next) => {
+//   try {
+//     const { memberId } = req.body;
+//     const r = await memberCheckOutService(memberId);
+//     res.json({ success: true, attendance: r });
+//   } catch (err) {
+//     next(err);
+//   }
+// };
+
 export const memberCheckOut = async (req, res, next) => {
   try {
-    const { memberId } = req.body;
+    const memberId = req.user.id; // token se
     const r = await memberCheckOutService(memberId);
     res.json({ success: true, attendance: r });
   } catch (err) {

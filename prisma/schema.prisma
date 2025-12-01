@@ -80,14 +80,18 @@ notificationLog  NotificationLog[]//add
 }
 
 model Plan {
-  id        Int      @id @default(autoincrement())
-  name      String
-  duration  Int      // number of days
-  price     Float
-  createdAt DateTime @default(now())
-  members   Member[]
-  payments  Payment[]
+  id          Int       @id @default(autoincrement())
+  name        String
+  category    String?   // optional category
+  description String?   // new field
+  status      String    @default("ACTIVE") // new field, default ACTIVE
+  duration    String
+  price       Float
+  createdAt   DateTime  @default(now())
+  members     Member[]
+  payments    Payment[]
 }
+
 
 
 model MemberAttendance {
@@ -96,9 +100,10 @@ model MemberAttendance {
   branchId   Int
   checkIn    DateTime  @default(now())
   checkOut   DateTime?
+  createdAt  DateTime  @default(now()) // ✅ added
 
   member     Member    @relation(fields: [memberId], references: [id])
-  branch     Branch    @relation(fields: [branchId], references: [id])
+  branch     Branch    @relation(fields: [branchId], references: [id])
 }
 
 
@@ -159,9 +164,8 @@ model Payment {
   member Member @relation(fields: [memberId], references: [id])
   plan   Plan   @relation(fields: [planId], references: [id])
 
-  gstPercent Float?  // example: 18
-gstAmount  Float?  // example: calculated tax
-
+  gstPercent Float?  
+  gstAmount  Float?  
 }
 
 
@@ -296,3 +300,15 @@ model StockMovement {
 
   product    Product   @relation(fields: [productId], references: [id])
 }
+
+model Purchase {
+  id              Int      @id @default(autoincrement())
+  selectedPlan    String
+  companyName     String
+  email           String
+  billingDuration String   // Monthly | Yearly
+  startDate       DateTime
+  purchaseDate    DateTime @default(now())
+  status          String   @default("pending")
+}
+

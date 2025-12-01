@@ -1,18 +1,65 @@
 import { prisma } from "../../config/db.js";
 
-export const createBranchService = async ({ name, location, phone }) => {
-  const exists = await prisma.branch.findFirst({ where: { name } });
-  if (exists) throw { status: 400, message: "Branch name already exists" };
-
-  const branch = await prisma.branch.create({
-    data: { name, location, phone }
+export const createStaffService = async ({
+  fullName,
+  email,
+  phone,
+  password,
+  roleId,
+  branchId,
+}) => {
+  // Check if staff already exists
+  const exists = await prisma.user.findUnique({
+    where: { email },
   });
 
-  return branch;
+  if (exists) {
+    throw { status: 400, message: "Email already exists" };
+  }
+
+  // Create staff (password already hashed before calling this service)
+  const user = await prisma.user.create({
+    data: {
+      fullName,
+      email,
+      phone,
+      password,
+      roleId,
+      branchId,
+    },
+    include: {
+      role: true,
+      branch: true,
+    },
+  });
+
+  return user;
 };
 
-export const listBranchesService = async () => {
-  return prisma.branch.findMany({
-    orderBy: { id: "desc" }
+export const listStaffService = async (branchId) => {
+  return prisma.user.findMany({
+    where: { branchId },
+    include: {
+      role: true,
+    },
+    orderBy: {
+      id: "desc",
+    },
   });
+};
+
+export const staffDetailService = async (id) => {
+  const staff = await prisma.user.findUnique({
+    where: { id },
+    include: {
+      role: true,
+      branch: true,
+    },
+  });
+
+  if (!staff) {
+    throw { status: 404, message: "Staff not found" };
+  }
+
+  return staff;
 };

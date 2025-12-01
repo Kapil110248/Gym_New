@@ -12,22 +12,41 @@ import {
 
 const router = Router();
 
+// // MEMBER ATTENDANCE
+// router.post(
+//   "/member/checkin",
+//   verifyToken(["Admin", "Staff", "Superadmin"]),
+//   memberCheckIn
+// );
+
+// router.post(
+//   "/member/checkout",
+//   verifyToken(["Admin", "Staff", "Superadmin"]),
+//   memberCheckOut
+// );
+
+// router.get(
+//   "/member/history/:memberId",
+//   verifyToken(["Admin", "Staff", "Superadmin"]),
+//   memberAttendanceList
+// );
+
 // MEMBER ATTENDANCE
 router.post(
   "/member/checkin",
-  verifyToken(["Admin", "Staff", "Superadmin"]),
+  verifyToken(["Admin", "Staff", "Member"]),
   memberCheckIn
 );
 
 router.post(
   "/member/checkout",
-  verifyToken(["Admin", "Staff", "Superadmin"]),
+  verifyToken(["Admin", "Staff", "Member"]),
   memberCheckOut
 );
 
 router.get(
   "/member/history/:memberId",
-  verifyToken(["Admin", "Staff", "Superadmin"]),
+  verifyToken(["Admin", "Staff", "Member"]),
   memberAttendanceList
 );
 

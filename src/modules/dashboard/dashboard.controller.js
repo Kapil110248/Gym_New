@@ -6,5 +6,5 @@ export const getDashboardData = async (req, res, next) => {
     res.json({ success: true, dashboard: data });
   } catch (err) {
     next(err);
-  }
-};
+  }
+}

@@ -1,21 +1,29 @@
 import { Router } from "express";
-import { createBranch, listBranches } from "./staff.controller.js";
+import { createStaff, listStaff, staffDetail } from "./staff.controller.js";
 import { verifyToken } from "../../middlewares/auth.js";
 
 const router = Router();
 
-// Only SUPERADMIN can create branches
-router.post(
-  "/create",
-  verifyToken(["Superadmin","Admin"]),
-  createBranch
+/**
+ * Create Staff
+ * Only Superadmin & Admin can create new staff
+ */
+router.post("/create", verifyToken(["Superadmin", "Admin"]), createStaff);
+
+/**
+ * List Staff by Branch
+ * Admin → only their own branch
+ * Superadmin → any branch
+ */
+router.get(
+  "/branch/:branchId",
+  verifyToken(["Superadmin", "Admin"]),
+  listStaff
 );
 
-// Superadmin + Admin can view branches
-router.get(
-  "/",
-  verifyToken(["Superadmin", "Admin"]),
-  listBranches
-);
+/**
+ * Get Staff Detail by Staff ID
+ */
+router.get("/detail/:id", verifyToken(["Superadmin", "Admin"]), staffDetail);
 
 export default router;

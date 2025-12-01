@@ -25,6 +25,9 @@ import notifRoutes from "../modules/notifications/notif.routes.js";
 import invoiceRoutes from "../modules/invoice/invoice.routes.js";
 import financeRoutes from "../modules/finance/finance.routes.js";
 import inventoryRoutes from "../modules/inventory/inventory.routes.js";
+import purchaseRoutes from "../modules/purchase/purchase.routes.js";
+
+
 
 
 
@@ -41,7 +44,7 @@ router.get("/ping", (req, res) => {
 //auth
 router.use("/auth", authRoutes);
 router.use("/branches", branchRoutes);
-router.use("/staff", staffRoutes);
+router.use("/staff", staffRoutes);   
 router.use("/members", memberRoutes);
 router.use("/plans", planRoutes);
 router.use("/attendance", attendanceRoutes);
@@ -56,7 +59,6 @@ router.use("/workout", workoutRoutes);
 router.use("/notify", notifRoutes);
 router.use("/invoices", invoiceRoutes);
 router.use("/inventory", inventoryRoutes);
-
-
+router.use("/purchases", purchaseRoutes); 
 
 export default router;

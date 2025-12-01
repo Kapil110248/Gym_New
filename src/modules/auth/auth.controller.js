@@ -39,7 +39,7 @@ export const login = async (req, res, next) => {
         fullName: data.user.fullName,
         email: data.user.email,
         phone: data.user.phone,
-        role: data.user.role.name,
+        role: data.user.role.name || null,
         branchId: data.user.branchId,
         branchName: data.user.branch?.name || null,
       },
