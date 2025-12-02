@@ -383,7 +383,6 @@ enum plan_duration {
   Yearly
 }
 
-<<<<<<< HEAD
 model Memberplan {
   id           Int      @id @default(autoincrement())
   name         String
@@ -395,4 +394,12 @@ model Memberplan {
   type         String?
   createdAt    DateTime @default(now())
 }
+
+
+enum branch_status {
+  ACTIVE
+  INACTIVE
+}
+
+
 
