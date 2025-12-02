@@ -8,7 +8,6 @@ export const saveMemberPlan = async (payload) => {
       sessions: Number(payload.sessions),
       validityDays: Number(payload.validity),
       price: Number(payload.price),
-      branchId: Number(payload.branchId),
       type: "GROUP"
     }
   });
@@ -42,7 +41,6 @@ export const updateMemberPlan = async (id, payload) => {
       sessions: Number(payload.sessions),
       validityDays: Number(payload.validity),
       price: Number(payload.price),
-      branchId: Number(payload.branchId)
     }
   });
 };

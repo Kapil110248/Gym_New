@@ -31,26 +31,8 @@ model booking {
   member        member        @relation(fields: [memberId], references: [id], map: "Booking_memberId_fkey")
   classschedule classschedule @relation(fields: [scheduleId], references: [id], map: "Booking_scheduleId_fkey")
 
-  // ✅ UI ke hisaab se: Address
-  address   String?
-
-  phone     String?
-
-  // ✅ Status dropdown (Active / Inactive)
-  status    BranchStatus @default(ACTIVE)
-
-  users              User[]
-  members            Member[]
-  memberAttendances  MemberAttendance[]
-  staffAttendances   StaffAttendance[]
-  classSchedules     ClassSchedule[]
-  alerts             Alert[]
-  expense            Expense[]
-  products           Product[]
-  plans              Plan[]
-  memberplan         Memberplan[]
-
-  createdAt DateTime @default(now())
+  @@index([memberId], map: "Booking_memberId_fkey")
+  @@index([scheduleId], map: "Booking_scheduleId_fkey")
 }
 
 model branch {
@@ -388,8 +370,6 @@ model Memberplan {
   sessions     Int
   validityDays Int
   price        Int
-  branchId     Int
-  branch       Branch   @relation(fields: [branchId], references: [id])
   type         String?
   createdAt    DateTime @default(now())
 }
