@@ -396,11 +396,3 @@ model Memberplan {
   createdAt    DateTime @default(now())
 }
 
-
-
-=======
-enum branch_status {
-  ACTIVE
-  INACTIVE
-}
->>>>>>> cc8f2662686a16e63c1a30bc40369860701e1c9a
