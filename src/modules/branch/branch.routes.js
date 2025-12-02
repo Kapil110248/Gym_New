@@ -7,7 +7,7 @@ const router = Router();
 // Only SUPERADMIN can create branches
 router.post(
   "/create",
-  verifyToken(["Superadmin"]),
+  verifyToken(["Superadmin","Admin"]),
   createBranch
 );
 

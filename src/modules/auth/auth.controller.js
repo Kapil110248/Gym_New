@@ -1,13 +1,8 @@
-import { registerUser, loginUser } from "./auth.service.js";
+import { registerUser, loginUser , fetchUserById,
+  modifyUser,
+  removeUser, fetchAdmins, fetchDashboardStats} from "./auth.service.js";
 
-// export const register = async (req, res, next) => {
-//   try {
-//     const user = await registerUser(req.body);
-//     res.json({ success: true, user });
-//   } catch (err) {
-//     next(err);
-//   }
-// };
+
 
 export const register = async (req, res, next) => {
   try {
@@ -19,14 +14,65 @@ export const register = async (req, res, next) => {
   }
 };
 
-// export const login = async (req, res, next) => {
-//   try {
-//     const data = await loginUser(req.body);
-//     res.json({ success: true, ...data });
-//   } catch (err) {
-//     next(err);
-//   }
-// };
+
+export const getUserById = async (req, res, next) => {
+  try {
+    const data = await fetchUserById(Number(req.params.id));
+    res.json({ success: true, user: data });
+  } catch (err) {
+    next(err);
+  }
+};
+
+
+export const getAdmins = async (req, res, next) => {
+  try {
+    const data = await fetchAdmins(); // service se fetch
+
+    res.json({
+      success: true,
+      admins: data
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+
+
+export const updateUser = async (req, res, next) => {
+  try {
+    const data = await modifyUser(Number(req.params.id), req.body);
+    res.json({ success: true, user: data });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const deleteUser = async (req, res, next) => {
+  try {
+    const data = await removeUser(Number(req.params.id));
+    res.json({ success: true, message: "User deleted" });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const getDashboardStats = async (req, res, next) => {
+  try {
+    const data = await fetchDashboardStats(); // service se fetch
+
+    res.json({
+      success: true,
+      dashboard: data
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+
+
 
 export const login = async (req, res, next) => {
   try {

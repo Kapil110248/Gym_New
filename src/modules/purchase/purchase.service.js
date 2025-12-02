@@ -17,3 +17,17 @@ export const getAllPurchasesService = async () => {
     orderBy: { id: "desc" }
   });
 };
+
+export const modifyPurchaseStatus = async (id, status) => {
+  if (!status) {
+    throw { status: 400, message: "Status is required" };
+  }
+
+  const updated = await prisma.purchase.update({
+    where: { id },
+    data: { status }
+  });
+
+  return updated;
+};
+
