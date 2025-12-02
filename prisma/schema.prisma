@@ -34,6 +34,7 @@ model Branch {
   alerts             Alert[]
   expense            Expense[]
   products           Product[]
+  plans              Plan[]
 
   createdAt DateTime @default(now())
 }
@@ -58,6 +59,7 @@ model User {
 
 
 
+
 model Member {
   id             Int       @id @default(autoincrement())
   fullName       String
@@ -72,6 +74,12 @@ model Member {
   membershipFrom DateTime?
   membershipTo   DateTime?
 
+  //new fields 
+   dob            String?
+  paymentMode    String?
+  interestedIn   String?
+  amountPaid     Int?
+
   branch Branch  @relation(fields: [branchId], references: [id])
   plan   Plan?   @relation(fields: [planId], references: [id])
 
@@ -81,21 +89,30 @@ model Member {
    alerts Alert[]//add
    dietPlanAssignments DietPlanAssignment[]   // 🔥 new
 workoutPlanAssignments WorkoutPlanAssignment[]  // 🔥 new
-notificationLog  NotificationLog[]//add 
+notificationLog  NotificationLog[]//add 
 
 }
 
+
+
 model Plan {
-  id          Int           @id @default(autoincrement())
-  name        String
-  category    String?
-  description String?
-  status      String        @default("ACTIVE")
-  duration    PlanDuration  // <-- enum type
-  price       Float
-  createdAt   DateTime      @default(now())
-  members     Member[]
-  payments    Payment[]
+  id           Int          @id @default(autoincrement())
+  name         String
+  category     String?
+  description  String?
+  status       String        @default("ACTIVE")
+  duration     PlanDuration
+  price        Float
+
+  sessions     Int          @default(0)      // 👈 default
+  validityDays Int          @default(0)      // 👈 default
+
+  branchId     Int?                            // 👈 optional
+  branch       Branch? @relation(fields: [branchId], references: [id])
+
+  createdAt    DateTime     @default(now())
+  members      Member[]
+  payments     Payment[]
 }
 
 

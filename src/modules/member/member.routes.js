@@ -3,6 +3,8 @@ import {
   createMember,
   listMembers,
   memberDetail,
+  updateMember,
+  deleteMember
 } from "./member.controller.js";
 import { verifyToken } from "../../middlewares/auth.js";
 
@@ -14,6 +16,8 @@ router.post(
   verifyToken(["Superadmin", "Admin", "Staff"]),
   createMember
 );
+
+router.put("/update/:id", updateMember);
 
 /** List members of a branch */
 router.get(
@@ -29,4 +33,7 @@ router.get(
   memberDetail
 );
 
-export default router;
+
+router.delete("/delete/:id", deleteMember);
+
+export default router;
