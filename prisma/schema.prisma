@@ -28,7 +28,6 @@ model booking {
   id            Int           @id @default(autoincrement())
   memberId      Int
   scheduleId    Int
-  createdAt     DateTime      @default(now())
   member        member        @relation(fields: [memberId], references: [id], map: "Booking_memberId_fkey")
   classschedule classschedule @relation(fields: [scheduleId], references: [id], map: "Booking_scheduleId_fkey")
 
