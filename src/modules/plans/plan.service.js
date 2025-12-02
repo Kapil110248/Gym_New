@@ -2,7 +2,11 @@ import { prisma } from "../../config/db.js";
 
 // ---------------- CREATE PLAN ----------------
 export const createPlanService = async (data) => {
-  // allowed fields (Prisma model के हिसाब से)
+  // duration validate
+  if (data.duration && !["Monthly", "Yearly"].includes(data.duration)) {
+    throw { status: 400, message: "Invalid duration. Allowed: Monthly, Yearly" };
+  }
+
   const allowedFields = [
     "name",
     "price",
@@ -30,7 +34,7 @@ export const createPlanService = async (data) => {
     throw { status: 400, message: "Plan name already exists" };
   }
 
-  // ✅ सिर्फ allowed fields ही भेजेंगे
+  // only allowed fields
   const createData = {};
   for (const key of allowedFields) {
     if (data[key] !== undefined) {
@@ -51,15 +55,28 @@ export const createPlanService = async (data) => {
 };
 
 // ---------------- LIST PLANS ----------------
-export const listPlansService = async () => {
+export const listPlansService = async (duration) => {
+  const where = {};
+
+  // Optional duration filter
+  if (duration && ["Monthly", "Yearly"].includes(duration)) {
+    where.duration = duration;
+  }
+
   return prisma.plan.findMany({
+    where,
     orderBy: { id: "desc" }
   });
 };
 
 // ---------------- UPDATE PLAN ----------------
 export const updatePlanService = async (id, data) => {
-  // Plan exist check
+  // duration validate
+  if (data.duration && !["Monthly", "Yearly"].includes(data.duration)) {
+    throw { status: 400, message: "Invalid duration. Allowed: Monthly, Yearly" };
+  }
+
+  // Check exist
   const existingPlan = await prisma.plan.findUnique({
     where: { id }
   });
@@ -68,12 +85,12 @@ export const updatePlanService = async (id, data) => {
     throw { status: 404, message: "Plan not found" };
   }
 
-  // 🔁 अगर name update कर रहे हो → Duplicate check
+  // Duplicate name check (if name updated)
   if (data.name) {
     const duplicate = await prisma.plan.findFirst({
       where: {
         name: data.name,
-        NOT: { id } // same record को छोड़के
+        NOT: { id }
       }
     });
 
@@ -82,7 +99,6 @@ export const updatePlanService = async (id, data) => {
     }
   }
 
-  // ✅ सिर्फ valid fields Prisma को भेजेंगे
   const allowedFields = [
     "name",
     "price",
@@ -111,13 +127,28 @@ export const updatePlanService = async (id, data) => {
 
   return updatedPlan;
 };
-
 // ---------------- DELETE PLAN ----------------
 export const deletePlanService = async (id) => {
-  // Optional: पहले exist check करना हो तो कर सकते हैं
-  // const existing = await prisma.plan.findUnique({ where: { id } });
-  // if (!existing) throw { status: 404, message: "Plan not found" };
+  // Plan exist check
+  const existingPlan = await prisma.plan.findUnique({
+    where: { id },
+    include: { payments: true } // 👈 relation naam agar "payments" hai
+  });
 
+  if (!existingPlan) {
+    throw { status: 404, message: "Plan not found" };
+  }
+
+  // Agar is plan ke against payments hain to delete block karo
+  if (existingPlan.payments && existingPlan.payments.length > 0) {
+    throw {
+      status: 400,
+      message:
+        "This plan has payments. You cannot delete it. Please mark it as INACTIVE instead."
+    };
+  }
+
+  // Ab safely delete kar sakte hain (agar koi payment nahi hai)
   return prisma.plan.delete({
     where: { id }
   });

@@ -16,12 +16,16 @@ export const createPlan = async (req, res, next) => {
 
 export const listPlans = async (req, res, next) => {
   try {
-    const plans = await listPlansService();
+    const { duration } = req.query; // ?duration=Monthly
+
+    const plans = await listPlansService(duration);
+
     res.json({ success: true, plans });
   } catch (err) {
     next(err);
   }
 };
+
 
 export const updatePlan = async (req, res, next) => {
   try {

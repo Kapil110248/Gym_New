@@ -86,17 +86,18 @@ notificationLog  NotificationLog[]//add
 }
 
 model Plan {
-  id          Int       @id @default(autoincrement())
+  id          Int           @id @default(autoincrement())
   name        String
-  category    String?   // optional category
-  description String?   // new field
-  status      String    @default("ACTIVE") // new field, default ACTIVE
-  duration    String
+  category    String?
+  description String?
+  status      String        @default("ACTIVE")
+  duration    PlanDuration  // <-- enum type
   price       Float
-  createdAt   DateTime  @default(now())
+  createdAt   DateTime      @default(now())
   members     Member[]
   payments    Payment[]
 }
+
 
 
 
@@ -160,19 +161,20 @@ model Booking {
 
 
 model Payment {
-  id          Int       @id @default(autoincrement())
+  id          Int      @id @default(autoincrement())
   memberId    Int
   planId      Int
   amount      Float
-  paymentDate DateTime  @default(now())
-  invoiceNo   String    @unique
+  paymentDate DateTime @default(now())
+  invoiceNo   String   @unique
 
   member Member @relation(fields: [memberId], references: [id])
-  plan   Plan   @relation(fields: [planId], references: [id])
+  plan   Plan   @relation(fields: [planId], references: [id], onDelete: Cascade)
 
-  gstPercent Float?  
-  gstAmount  Float?  
+  gstPercent Float?
+  gstAmount  Float?
 }
+
 
 
 model Alert {
@@ -322,3 +324,9 @@ enum BranchStatus {
   ACTIVE
   INACTIVE
 }
+
+enum PlanDuration {
+  Monthly
+  Yearly
+}
+
