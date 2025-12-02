@@ -6,6 +6,8 @@ import {
   getBranchById,
   updateBranch,
   deleteBranch,
+  getBranchByAdminId,
+  
 } from "./branch.controller.js";
 import { verifyToken } from "../../middlewares/auth.js";
 
@@ -23,6 +25,12 @@ router.get(
   "/",
   verifyToken(["Superadmin", "Admin"]),
   listBranches
+);
+
+router.get(
+  "/by-admin/:adminId",
+  verifyToken(["Superadmin", "Admin"]),
+  getBranchByAdminId
 );
 
 // Get single branch (view icon) – Superadmin + Admin

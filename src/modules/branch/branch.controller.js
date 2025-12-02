@@ -5,6 +5,7 @@ import {
   getBranchByIdService,
   updateBranchService,
   deleteBranchService,
+  getBranchByAdminIdService
 } from "./branch.service.js";
 
 export const createBranch = async (req, res, next) => {
@@ -29,6 +30,20 @@ export const getBranchById = async (req, res, next) => {
   try {
     const branch = await getBranchByIdService(req.params.id);
     res.json({ success: true, branch });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const getBranchByAdminId = async (req, res, next) => {
+  try {
+    const { adminId } = req.params;
+    const branch = await getBranchByAdminIdService(adminId);
+
+    res.json({
+      success: true,
+      branch,
+    });
   } catch (err) {
     next(err);
   }

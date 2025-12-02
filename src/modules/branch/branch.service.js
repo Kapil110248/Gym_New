@@ -47,6 +47,30 @@ export const getBranchByIdService = async (id) => {
   return branch;
 };
 
+export const getBranchByAdminIdService = async (adminId) => {
+  const user = await prisma.user.findFirst({
+    where: {
+      id: Number(adminId),
+      role: {
+        name: "Admin",   // sirf Admin
+      },
+    },
+    include: {
+      branch: true,
+    },
+  });
+
+  if (!user) {
+    throw { status: 404, message: "Admin not found" };
+  }
+
+  if (!user.branch) {
+    throw { status: 404, message: "This admin is not assigned to any branch" };
+  }
+
+  return user.branch;
+};
+
 // UPDATE
 export const updateBranchService = async (id, { name, address, phone, status }) => {
   const branchId = Number(id);

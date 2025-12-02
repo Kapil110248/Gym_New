@@ -7,16 +7,30 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Role {
+model alert {
   id        Int      @id @default(autoincrement())
-  name      String   @unique
-  users     User[]
+  type      String
+  message   String
+  memberId  Int?
+  staffId   Int?
+  branchId  Int
   createdAt DateTime @default(now())
+  branch    branch   @relation(fields: [branchId], references: [id], map: "Alert_branchId_fkey")
+  member    member?  @relation(fields: [memberId], references: [id], map: "Alert_memberId_fkey")
+  user      user?    @relation(fields: [staffId], references: [id], map: "Alert_staffId_fkey")
+
+  @@index([branchId], map: "Alert_branchId_fkey")
+  @@index([memberId], map: "Alert_memberId_fkey")
+  @@index([staffId], map: "Alert_staffId_fkey")
 }
 
-model Branch {
-  id        Int      @id @default(autoincrement())
-  name      String
+model booking {
+  id            Int           @id @default(autoincrement())
+  memberId      Int
+  scheduleId    Int
+  createdAt     DateTime      @default(now())
+  member        member        @relation(fields: [memberId], references: [id], map: "Booking_memberId_fkey")
+  classschedule classschedule @relation(fields: [scheduleId], references: [id], map: "Booking_scheduleId_fkey")
 
   // ✅ UI ke hisaab se: Address
   address   String?
@@ -40,125 +54,25 @@ model Branch {
   createdAt DateTime @default(now())
 }
 
-model User {
-  id        Int      @id @default(autoincrement())
-  fullName  String
-  email     String   @unique
-  password  String
-  phone     String?
-  roleId    Int
-  branchId  Int?
-  role      Role     @relation(fields: [roleId], references: [id])
-  branch    Branch?  @relation(fields: [branchId], references: [id])
-  gymName String?
-  address String?
-  planName String?
-  price String?
-  duration String?
-  description String?
-  status String?
-
-  staffAttendances StaffAttendance[]//add
-   classSchedules   ClassSchedule[] //add
-   alerts Alert[]//add
-
-
-  createdAt DateTime @default(now())
+model branch {
+  id               Int                @id @default(autoincrement())
+  name             String
+  phone            String?
+  createdAt        DateTime           @default(now())
+  address          String?
+  status           branch_status      @default(ACTIVE)
+  alert            alert[]
+  classschedule    classschedule[]
+  expense          expense[]
+  member           member[]
+  memberattendance memberattendance[]
+  plan             plan[]
+  product          product[]
+  staffattendance  staffattendance[]
+  user             user[]
 }
 
-
-
-
-model Member {
-  id             Int       @id @default(autoincrement())
-  fullName       String
-  email          String?   @unique
-  phone          String
-  gender         String?
-  age            Int?
-  address        String?
-  joinDate       DateTime  @default(now())
-  branchId       Int
-  planId         Int?
-  membershipFrom DateTime?
-  membershipTo   DateTime?
-
-  //new fields 
-   dob            String?
-  paymentMode    String?
-  interestedIn   String?
-  amountPaid     Int?
-
-  branch Branch  @relation(fields: [branchId], references: [id])
-  plan   Plan?   @relation(fields: [planId], references: [id])
-
-   attendances MemberAttendance[]//add
-   bookings     Booking[]  //add    
-   payments  Payment[]//add
-   alerts Alert[]//add
-   dietPlanAssignments DietPlanAssignment[]   // 🔥 new
-workoutPlanAssignments WorkoutPlanAssignment[]  // 🔥 new
-notificationLog  NotificationLog[]//add 
-
-}
-
-
-
-model Plan {
-  id           Int          @id @default(autoincrement())
-  name         String
-  category     String?
-  description  String?
-  status       String        @default("ACTIVE")
-  duration     PlanDuration
-  price        Float
-
-  sessions     Int          @default(0)      // 👈 default
-  validityDays Int          @default(0)      // 👈 default
-
-  branchId     Int?                            // 👈 optional
-  branch       Branch? @relation(fields: [branchId], references: [id])
-
-  createdAt    DateTime     @default(now())
-  members      Member[]
-  payments     Payment[]
-}
-
-
-
-
-model MemberAttendance {
-  id         Int       @id @default(autoincrement())
-  memberId   Int
-  branchId   Int
-  checkIn    DateTime  @default(now())
-  checkOut   DateTime?
-  createdAt  DateTime  @default(now()) // ✅ added
-
-  member     Member    @relation(fields: [memberId], references: [id])
-  branch     Branch    @relation(fields: [branchId], references: [id])
-}
-
-
-model StaffAttendance {
-  id         Int       @id @default(autoincrement())
-  staffId    Int
-  branchId   Int
-  checkIn    DateTime  @default(now())
-  checkOut   DateTime?
-
-  staff      User      @relation(fields: [staffId], references: [id])
-  branch     Branch    @relation(fields: [branchId], references: [id])
-}
-
-model ClassType {
-  id        Int       @id @default(autoincrement())
-  name      String
-  createdAt DateTime  @default(now())
-  schedules ClassSchedule[]
-}
-
-model ClassSchedule {
+model classschedule {
   id          Int       @id @default(autoincrement())
   branchId    Int
   classTypeId Int
@@ -167,58 +81,58 @@ model ClassSchedule {
   startTime   DateTime
   endTime     DateTime
   capacity    Int
+  booking     booking[]
+  branch      branch    @relation(fields: [branchId], references: [id], map: "ClassSchedule_branchId_fkey")
+  classtype   classtype @relation(fields: [classTypeId], references: [id], map: "ClassSchedule_classTypeId_fkey")
+ user        user      @relation(fields: [trainerId], references: [id], map: "ClassSchedule_trainerId_fkey")
+//  user        Staff     @relation(fields: [trainerId], references: [id], map: "ClassSchedule_trainerId_fkey")
 
-  classType   ClassType   @relation(fields: [classTypeId], references: [id])
-  trainer     User        @relation(fields: [trainerId], references: [id])
-  branch      Branch      @relation(fields: [branchId], references: [id])
-  bookings    Booking[]
+  @@index([branchId], map: "ClassSchedule_branchId_fkey")
+  @@index([classTypeId], map: "ClassSchedule_classTypeId_fkey")
+  @@index([trainerId], map: "ClassSchedule_trainerId_fkey")
 }
 
-model Booking {
+model classtype {
+  id            Int             @id @default(autoincrement())
+  name          String
+  createdAt     DateTime        @default(now())
+  classschedule classschedule[]
+}
+
+model dietmeal {
   id         Int      @id @default(autoincrement())
+  dietPlanId Int
+  time       String
+  food       String
+  dietplan   dietplan @relation(fields: [dietPlanId], references: [id], map: "DietMeal_dietPlanId_fkey")
+
+  @@index([dietPlanId], map: "DietMeal_dietPlanId_fkey")
+}
+
+model dietplan {
+  id                 Int                  @id @default(autoincrement())
+  title              String
+  notes              String?
+  createdBy          Int
+  branchId           Int
+  createdAt          DateTime             @default(now())
+  dietmeal           dietmeal[]
+  dietplanassignment dietplanassignment[]
+}
+
+model dietplanassignment {
+  id         Int      @id @default(autoincrement())
+  dietPlanId Int
   memberId   Int
-  scheduleId Int
-  createdAt  DateTime @default(now())
+  assignedAt DateTime @default(now())
+  dietplan   dietplan @relation(fields: [dietPlanId], references: [id], map: "DietPlanAssignment_dietPlanId_fkey")
+  member     member   @relation(fields: [memberId], references: [id], map: "DietPlanAssignment_memberId_fkey")
 
-  member     Member        @relation(fields: [memberId], references: [id])
-  schedule   ClassSchedule @relation(fields: [scheduleId], references: [id])
+  @@index([dietPlanId], map: "DietPlanAssignment_dietPlanId_fkey")
+  @@index([memberId], map: "DietPlanAssignment_memberId_fkey")
 }
 
-
-
-model Payment {
-  id          Int      @id @default(autoincrement())
-  memberId    Int
-  planId      Int
-  amount      Float
-  paymentDate DateTime @default(now())
-  invoiceNo   String   @unique
-
-  member Member @relation(fields: [memberId], references: [id])
-  plan   Plan   @relation(fields: [planId], references: [id], onDelete: Cascade)
-
-  gstPercent Float?
-  gstAmount  Float?
-}
-
-
-
-model Alert {
-  id        Int      @id @default(autoincrement())
-  type      String   // EXPIRING, EXPIRED, NO_PAYMENT, NO_CHECKIN, STAFF_ABSENT
-  message   String
-  memberId  Int?
-  staffId   Int?
-  branchId  Int
-  createdAt DateTime @default(now())
-
-  member    Member? @relation(fields: [memberId], references: [id])
-  staff     User?   @relation(fields: [staffId], references: [id])
-  branch    Branch  @relation(fields: [branchId], references: [id])
-}
-
-
-model Expense {
+model expense {
   id        Int      @id @default(autoincrement())
   title     String
   category  String
@@ -227,135 +141,249 @@ model Expense {
   branchId  Int
   notes     String?
   createdAt DateTime @default(now())
+  branch    branch   @relation(fields: [branchId], references: [id], map: "Expense_branchId_fkey")
 
-  branch Branch @relation(fields: [branchId], references: [id])
+  @@index([branchId], map: "Expense_branchId_fkey")
 }
 
-model DietPlan {
+model member {
+  id                    Int                     @id @default(autoincrement())
+  fullName              String
+  email                 String?                 @unique(map: "Member_email_key")
+  phone                 String
+  gender                String?
+  age                   Int?
+  address               String?
+  joinDate              DateTime                @default(now())
+  branchId              Int
+  planId                Int?
+  membershipFrom        DateTime?
+  membershipTo          DateTime?
+  amountPaid            Int?
+  dob                   String?
+  interestedIn          String?
+  paymentMode           String?
+  alert                 alert[]
+  booking               booking[]
+  dietplanassignment    dietplanassignment[]
+  branch                branch                  @relation(fields: [branchId], references: [id], map: "Member_branchId_fkey")
+  plan                  plan?                   @relation(fields: [planId], references: [id], map: "Member_planId_fkey")
+  memberattendance      memberattendance[]
+  notificationlog       notificationlog[]
+  payment               payment[]
+  workoutplanassignment workoutplanassignment[]
+
+  @@index([branchId], map: "Member_branchId_fkey")
+  @@index([planId], map: "Member_planId_fkey")
+}
+
+model memberattendance {
   id        Int       @id @default(autoincrement())
-  title     String
-  notes     String?
-  createdBy Int
+  memberId  Int
   branchId  Int
-  createdAt DateTime @default(now())
+  checkIn   DateTime  @default(now())
+  checkOut  DateTime?
+  createdAt DateTime  @default(now())
+  branch    branch    @relation(fields: [branchId], references: [id], map: "MemberAttendance_branchId_fkey")
+  member    member    @relation(fields: [memberId], references: [id], map: "MemberAttendance_memberId_fkey")
 
-  meals     DietMeal[]
-  memberPlans DietPlanAssignment[]
+  @@index([branchId], map: "MemberAttendance_branchId_fkey")
+  @@index([memberId], map: "MemberAttendance_memberId_fkey")
 }
 
-model DietMeal {
+model notificationlog {
   id        Int      @id @default(autoincrement())
-  dietPlanId Int
-  time      String
-  food      String
-
-  dietPlan DietPlan @relation(fields: [dietPlanId], references: [id])
-}
-
-model DietPlanAssignment {
-  id         Int      @id @default(autoincrement())
-  dietPlanId Int
-  memberId   Int
-  assignedAt DateTime @default(now())
-
-  dietPlan DietPlan @relation(fields: [dietPlanId], references: [id])
-  member   Member   @relation(fields: [memberId], references: [id])
-}
-
-model WorkoutPlan {
-  id        Int       @id @default(autoincrement())
-  title     String
-  notes     String?
-  createdBy Int
-  branchId  Int
-  createdAt DateTime @default(now())
-
-  exercises WorkoutExercise[]
-  memberPlans WorkoutPlanAssignment[]
-}
-
-model WorkoutExercise {
-  id          Int      @id @default(autoincrement())
-  workoutPlanId Int
-  name        String
-  sets        Int?
-  reps        Int?
-  duration    String? // example: 30 mins
-
-  workoutPlan WorkoutPlan @relation(fields: [workoutPlanId], references: [id])
-}
-
-model WorkoutPlanAssignment {
-  id           Int      @id @default(autoincrement())
-  workoutPlanId Int
-  memberId     Int
-  assignedAt   DateTime @default(now())
-
-  workoutPlan WorkoutPlan @relation(fields: [workoutPlanId], references: [id])
-  member      Member      @relation(fields: [memberId], references: [id])
-}
-
-
-model NotificationLog {
-  id        Int      @id @default(autoincrement())
-  type      String   // WHATSAPP / EMAIL / SMS
+  type      String
   to        String
   message   String
   status    String   @default("PENDING")
   createdAt DateTime @default(now())
   memberId  Int?
+  member    member?  @relation(fields: [memberId], references: [id], map: "NotificationLog_memberId_fkey")
 
-  member    Member? @relation(fields: [memberId], references: [id])
+  @@index([memberId], map: "NotificationLog_memberId_fkey")
 }
 
-model Product {
-  id            Int              @id @default(autoincrement())
+model payment {
+  id          Int      @id @default(autoincrement())
+  memberId    Int
+  planId      Int
+  amount      Float
+  paymentDate DateTime @default(now())
+  invoiceNo   String   @unique(map: "Payment_invoiceNo_key")
+  gstAmount   Float?
+  gstPercent  Float?
+  member      member   @relation(fields: [memberId], references: [id], map: "Payment_memberId_fkey")
+  plan        plan     @relation(fields: [planId], references: [id], onDelete: Cascade, map: "Payment_planId_fkey")
+
+  @@index([memberId], map: "Payment_memberId_fkey")
+  @@index([planId], map: "Payment_planId_fkey")
+}
+
+model plan {
+  id           Int           @id @default(autoincrement())
+  name         String
+  duration     plan_duration
+  price        Float
+  createdAt    DateTime      @default(now())
+  category     String?
+  description  String?
+  status       String        @default("ACTIVE")
+  branchId     Int?
+  sessions     Int           @default(0)
+  validityDays Int           @default(0)
+  member       member[]
+  payment      payment[]
+  branch       branch?       @relation(fields: [branchId], references: [id], map: "Plan_branchId_fkey")
+
+  @@index([branchId], map: "Plan_branchId_fkey")
+}
+
+model product {
+  id            Int             @id @default(autoincrement())
   name          String
-  sku           String?          @unique
+  sku           String?         @unique(map: "Product_sku_key")
   category      String?
   sellingPrice  Float
   costPrice     Float?
-  currentStock  Int              @default(0)
+  currentStock  Int             @default(0)
   branchId      Int
-  isActive      Boolean          @default(true)
-  createdAt     DateTime         @default(now())
+  isActive      Boolean         @default(true)
+  createdAt     DateTime        @default(now())
+  branch        branch          @relation(fields: [branchId], references: [id], map: "Product_branchId_fkey")
+  stockmovement stockmovement[]
 
-  branch        Branch           @relation(fields: [branchId], references: [id])
-  movements     StockMovement[]
+  @@index([branchId], map: "Product_branchId_fkey")
 }
 
-model StockMovement {
-  id         Int       @id @default(autoincrement())
-  productId  Int
-  type       String    // PURCHASE / SALE / ADJUSTMENT
-  quantity   Int       // +ve for IN, -ve for OUT
-  note       String?
-  createdAt  DateTime  @default(now())
-
-  product    Product   @relation(fields: [productId], references: [id])
-}
-
-model Purchase {
+model purchase {
   id              Int      @id @default(autoincrement())
   selectedPlan    String
   companyName     String
   email           String
-  billingDuration String   // Monthly | Yearly
+  billingDuration String
   startDate       DateTime
   purchaseDate    DateTime @default(now())
   status          String   @default("pending")
 }
 
-enum BranchStatus {
-  ACTIVE
-  INACTIVE
+model role {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique(map: "Role_name_key")
+  createdAt DateTime @default(now())
+  user      user[]
 }
 
-enum PlanDuration {
+model staffattendance {
+  id       Int       @id @default(autoincrement())
+  staffId  Int
+  branchId Int
+  checkIn  DateTime  @default(now())
+  checkOut DateTime?
+  branch   branch    @relation(fields: [branchId], references: [id], map: "StaffAttendance_branchId_fkey")
+  user     user      @relation(fields: [staffId], references: [id], map: "StaffAttendance_staffId_fkey")
+
+  @@index([branchId], map: "StaffAttendance_branchId_fkey")
+  @@index([staffId], map: "StaffAttendance_staffId_fkey")
+}
+
+model stockmovement {
+  id        Int      @id @default(autoincrement())
+  productId Int
+  type      String
+  quantity  Int
+  note      String?
+  createdAt DateTime @default(now())
+  product   product  @relation(fields: [productId], references: [id], map: "StockMovement_productId_fkey")
+
+  @@index([productId], map: "StockMovement_productId_fkey")
+}
+
+model user {
+  id              Int               @id @default(autoincrement())
+  fullName        String
+  email           String            @unique(map: "User_email_key")
+  password        String
+  phone           String?
+  roleId          Int
+  branchId        Int?
+  createdAt       DateTime          @default(now())
+  address         String?
+  description     String?
+  duration        String?
+  gymName         String?
+  planName        String?
+  price           String?
+  status          String?
+  alert           alert[]
+  classschedule   classschedule[]
+  staffattendance staffattendance[]
+  branch          branch?           @relation(fields: [branchId], references: [id], map: "User_branchId_fkey")
+  role            role              @relation(fields: [roleId], references: [id], map: "User_roleId_fkey")
+//  staff           Staff //m. staff
+  staff            Staff?            @relation("UserStaff")
+
+
+  @@index([branchId], map: "User_branchId_fkey")
+  @@index([roleId], map: "User_roleId_fkey")
+}
+
+
+//m. staff
+model Staff {
+  id           Int      @id @default(autoincrement())
+  userId       Int      @unique
+  gender       String
+  dateOfBirth  DateTime
+  joinDate     DateTime
+  exitDate     DateTime?
+  profilePhoto String?
+  status       String   @default("Active")
+ user         user     @relation("UserStaff", fields: [userId], references: [id])
+  //user        user @relation(fields: [userId], references: [id])
+}
+
+model workoutexercise {
+  id            Int         @id @default(autoincrement())
+  workoutPlanId Int
+  name          String
+  sets          Int?
+  reps          Int?
+  duration      String?
+  workoutplan   workoutplan @relation(fields: [workoutPlanId], references: [id], map: "WorkoutExercise_workoutPlanId_fkey")
+
+  @@index([workoutPlanId], map: "WorkoutExercise_workoutPlanId_fkey")
+}
+
+model workoutplan {
+  id                    Int                     @id @default(autoincrement())
+  title                 String
+  notes                 String?
+  createdBy             Int
+  branchId              Int
+  createdAt             DateTime                @default(now())
+  workoutexercise       workoutexercise[]
+  workoutplanassignment workoutplanassignment[]
+}
+
+model workoutplanassignment {
+  id            Int         @id @default(autoincrement())
+  workoutPlanId Int
+  memberId      Int
+  assignedAt    DateTime    @default(now())
+  member        member      @relation(fields: [memberId], references: [id], map: "WorkoutPlanAssignment_memberId_fkey")
+  workoutplan   workoutplan @relation(fields: [workoutPlanId], references: [id], map: "WorkoutPlanAssignment_workoutPlanId_fkey")
+
+  @@index([memberId], map: "WorkoutPlanAssignment_memberId_fkey")
+  @@index([workoutPlanId], map: "WorkoutPlanAssignment_workoutPlanId_fkey")
+}
+
+enum plan_duration {
   Monthly
   Yearly
 }
 
+<<<<<<< HEAD
 model Memberplan {
   id           Int      @id @default(autoincrement())
   name         String
@@ -370,3 +398,9 @@ model Memberplan {
 
 
 
+=======
+enum branch_status {
+  ACTIVE
+  INACTIVE
+}
+>>>>>>> cc8f2662686a16e63c1a30bc40369860701e1c9a
