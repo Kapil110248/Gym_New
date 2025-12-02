@@ -17,19 +17,25 @@ model Role {
 model Branch {
   id        Int      @id @default(autoincrement())
   name      String
-  location  String?
+
+  // ✅ UI ke hisaab se: Address
+  address   String?
+
   phone     String?
-  users     User[]
-  members Member[]//add 
-   memberAttendances MemberAttendance[]//add
-  staffAttendances  StaffAttendance[]//add
-   classSchedules   ClassSchedule[] //add
-   alerts Alert[]//add
-   expense Expense[]//add
-   products Product[]//add
+
+  // ✅ Status dropdown (Active / Inactive)
+  status    BranchStatus @default(ACTIVE)
+
+  users              User[]
+  members            Member[]
+  memberAttendances  MemberAttendance[]
+  staffAttendances   StaffAttendance[]
+  classSchedules     ClassSchedule[]
+  alerts             Alert[]
+  expense            Expense[]
+  products           Product[]
 
   createdAt DateTime @default(now())
-
 }
 
 model User {
@@ -312,3 +318,7 @@ model Purchase {
   status          String   @default("pending")
 }
 
+enum BranchStatus {
+  ACTIVE
+  INACTIVE
+}

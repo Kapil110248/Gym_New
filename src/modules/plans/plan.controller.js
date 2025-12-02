@@ -11,8 +11,9 @@ export const createPlan = async (req, res, next) => {
     res.json({ success: true, plan });
   } catch (err) {
     next(err);
-  }
+  }
 };
+
 export const listPlans = async (req, res, next) => {
   try {
     const plans = await listPlansService();
@@ -24,9 +25,21 @@ export const listPlans = async (req, res, next) => {
 
 export const updatePlan = async (req, res, next) => {
   try {
-    const id = parseInt(req.params.id);
-    const plan = await updatePlanService(id, req.body);
-    res.json({ success: true, plan });
+    const id = Number(req.params.id);
+
+    if (!id) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid plan ID" });
+    }
+
+    const updatedPlan = await updatePlanService(id, req.body);
+
+    res.json({
+      success: true,
+      message: "Plan updated successfully",
+      plan: updatedPlan
+    });
   } catch (err) {
     next(err);
   }
@@ -34,8 +47,16 @@ export const updatePlan = async (req, res, next) => {
 
 export const deletePlan = async (req, res, next) => {
   try {
-    const id = parseInt(req.params.id);
+    const id = Number(req.params.id);
+
+    if (!id) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid plan ID" });
+    }
+
     await deletePlanService(id);
+
     res.json({ success: true, message: "Plan deleted" });
   } catch (err) {
     next(err);
