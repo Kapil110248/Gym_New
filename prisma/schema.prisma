@@ -17,20 +17,25 @@ model Role {
 model Branch {
   id        Int      @id @default(autoincrement())
   name      String
-  location  String?
+
+  // ✅ UI ke hisaab se: Address
+  address   String?
+
   phone     String?
-  status    String? //add
-  users     User[]
-  members Member[]//add 
-   memberAttendances MemberAttendance[]//add
-  staffAttendances  StaffAttendance[]//add
-   classSchedules   ClassSchedule[] //add
-   alerts Alert[]//add
-   expense Expense[]//add
-   products Product[]//add
+
+  // ✅ Status dropdown (Active / Inactive)
+  status    BranchStatus @default(ACTIVE)
+
+  users              User[]
+  members            Member[]
+  memberAttendances  MemberAttendance[]
+  staffAttendances   StaffAttendance[]
+  classSchedules     ClassSchedule[]
+  alerts             Alert[]
+  expense            Expense[]
+  products           Product[]
 
   createdAt DateTime @default(now())
-
 }
 
 model User {
@@ -91,17 +96,18 @@ notificationLog  NotificationLog[]//add
 }
 
 model Plan {
-  id          Int       @id @default(autoincrement())
+  id          Int           @id @default(autoincrement())
   name        String
-  category    String?   // optional category
-  description String?   // new field
-  status      String    @default("ACTIVE") // new field, default ACTIVE
-  duration    String
+  category    String?
+  description String?
+  status      String        @default("ACTIVE")
+  duration    PlanDuration  // <-- enum type
   price       Float
-  createdAt   DateTime  @default(now())
+  createdAt   DateTime      @default(now())
   members     Member[]
   payments    Payment[]
 }
+
 
 
 
@@ -165,19 +171,20 @@ model Booking {
 
 
 model Payment {
-  id          Int       @id @default(autoincrement())
+  id          Int      @id @default(autoincrement())
   memberId    Int
   planId      Int
   amount      Float
-  paymentDate DateTime  @default(now())
-  invoiceNo   String    @unique
+  paymentDate DateTime @default(now())
+  invoiceNo   String   @unique
 
   member Member @relation(fields: [memberId], references: [id])
-  plan   Plan   @relation(fields: [planId], references: [id])
+  plan   Plan   @relation(fields: [planId], references: [id], onDelete: Cascade)
 
-  gstPercent Float?  
-  gstAmount  Float?  
+  gstPercent Float?
+  gstAmount  Float?
 }
+
 
 
 model Alert {
@@ -321,5 +328,15 @@ model Purchase {
   startDate       DateTime
   purchaseDate    DateTime @default(now())
   status          String   @default("pending")
+}
+
+enum BranchStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum PlanDuration {
+  Monthly
+  Yearly
 }
 

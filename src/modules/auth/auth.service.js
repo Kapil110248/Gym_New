@@ -11,7 +11,7 @@ export const registerUser = async (data) => {
   const password = data.password;
   const phone = data.phone?.trim() || null;
   const roleId = data.roleId;
-  const branchId = data.branchId || null;
+  const branchId = data.branchId || null; 
 
    const gymName = data.gymName || null;
   const address = data.address || null;
