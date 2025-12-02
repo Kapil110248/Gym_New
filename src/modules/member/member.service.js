@@ -65,3 +65,110 @@ export const memberDetailService = async (id) => {
 
   return member;
 };
+
+export const updateMemberService = async (id, data) => {
+
+  // String Date: dob (no conversion)
+  if (data.dob) {
+    data.dob = data.dob; // string
+  }
+
+  // DateTime fields → convert
+  if (data.membershipFrom) {
+    data.membershipFrom = new Date(data.membershipFrom);
+  }
+
+  if (data.membershipTo) {
+    data.membershipTo = new Date(data.membershipTo);
+  }
+
+  // AmountPaid → Int (optional)
+  if (data.amountPaid) {
+    data.amountPaid = Number(data.amountPaid);
+  }
+
+  // Age → Int
+  if (data.age) {
+    data.age = Number(data.age);
+  }
+
+  // BranchId / PlanId
+  if (data.branchId) {
+    data.branchId = Number(data.branchId);
+  }
+
+  if (data.planId) {
+    data.planId = Number(data.planId);
+  }
+
+  const updated = await prisma.member.update({
+    where: { id },
+    data: {
+      ...data,   // ⭐ ALL FIELDS UPDATE HERE
+    },
+    include: {
+      plan: true,
+      branch: true
+    }
+  });
+
+  return updated;
+};
+
+export const deleteMemberService = async (id) => {
+  const member = await prisma.member.findUnique({
+    where: { id },
+  });
+
+  if (!member) {
+    throw { status: 404, message: "Member not found" };
+  }
+
+  // Delete member
+  await prisma.member.delete({
+    where: { id },
+  });
+
+  return true;
+};
+
+// export const memberDetailByNameService = async (name) => {
+//   const member = await prisma.member.findFirst({
+//     where: {
+//       fullName: {
+//         equals: name,
+        
+//       }
+//     },
+//     include: { 
+//       plan: true, 
+//       branch: true 
+//     },
+//   });
+
+//   if (!member) throw { status: 404, message: "Member not found" };
+
+//   return member;
+// };
+
+export const memberDetailByNameService = async (name) => {
+  const members = await prisma.member.findMany({
+    where: {
+      fullName: {
+        contains: name,
+        // mode: "insensitive"
+      }
+    },
+    include: {
+      plan: true,
+      branch: true
+    }
+  });
+
+  if (members.length === 0) {
+    throw { status: 404, message: "No members found" };
+  }
+
+  return members;
+};
+

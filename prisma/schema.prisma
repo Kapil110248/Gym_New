@@ -66,6 +66,12 @@ model Member {
   membershipFrom DateTime?
   membershipTo   DateTime?
 
+  //new fields 
+   dob            String?
+  paymentMode    String?
+  interestedIn   String?
+  amountPaid     Int?
+
   branch Branch  @relation(fields: [branchId], references: [id])
   plan   Plan?   @relation(fields: [planId], references: [id])
 
@@ -131,14 +137,18 @@ model ClassSchedule {
   classTypeId Int
   trainerId   Int
   date        DateTime
-  startTime   DateTime
-  endTime     DateTime
+  
+  startTime   String
+  endTime     String
   capacity    Int
 
   classType   ClassType   @relation(fields: [classTypeId], references: [id])
   trainer     User        @relation(fields: [trainerId], references: [id])
   branch      Branch      @relation(fields: [branchId], references: [id])
   bookings    Booking[]
+   members     Json? 
+     status      String     @default("Active")   // <-- added now
+     day     String?    
 }
 
 model Booking {

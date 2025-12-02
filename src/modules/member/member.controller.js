@@ -2,6 +2,9 @@ import {
   createMemberService,
   listMembersService,
   memberDetailService,
+  updateMemberService,
+  deleteMemberService,
+  memberDetailByNameService
 } from "./member.service.js";
 
 export const createMember = async (req, res, next) => {
@@ -46,3 +49,61 @@ export const memberDetail = async (req, res, next) => {
     next(err);
   }
 };
+
+// PUT /api/members/:id
+
+export const updateMember = async (req, res, next) => {
+  try {
+    const memberId = Number(req.params.id);
+
+    const updated = await updateMemberService(memberId, req.body);
+
+    res.json({
+      success: true,
+      message: "Member updated successfully",
+      member: updated
+    });
+
+  } catch (err) {
+    next(err);
+  }
+};
+
+
+
+
+export const deleteMember = async (req, res, next) => {
+  try {
+    const id = Number(req.params.id);
+
+    await deleteMemberService(id);
+
+    res.json({
+      success: true,
+      message: "Member deleted successfully",
+    });
+
+  } catch (err) {
+    next(err);
+  }
+};
+
+
+export const memberDetailByName = async (req, res, next) => {
+  try {
+    const name = req.params.name;  // coming from URL :name
+
+    const member = await memberDetailByNameService(name);
+
+    res.json({
+      success: true,
+      member
+    });
+
+  } catch (err) {
+    next(err);
+  }
+};
+
+
+

@@ -8,10 +8,20 @@ import {
   listSchedules,
   bookClass,
   cancelBooking,
-  memberBookings
+  memberBookings,
+  getAllScheduledClasses,
+  getScheduleById,
+  updateSchedule,
+  deleteSchedule
 } from "./class.controller.js";
 
 const router = Router();
+
+router.put("/scheduled/update/:id", verifyToken(["Admin", "Superadmin", "Staff"]), updateSchedule);
+router.delete("/scheduled/delete/:id", verifyToken(["Admin", "Superadmin", "Staff"]), deleteSchedule);
+
+router.get("/scheduled/all", verifyToken(["Admin", "Superadmin", "Staff"]), getAllScheduledClasses);
+router.get("/scheduled/scheduledById/:id", verifyToken(["Admin", "Superadmin", "Staff"]), getScheduleById);
 
 // CLASS TYPES
 router.post(
@@ -57,5 +67,7 @@ router.get(
   verifyToken(["Admin", "Superadmin", "Staff"]),
   memberBookings
 );
+
+
 
 export default router;
