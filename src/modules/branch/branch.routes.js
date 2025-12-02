@@ -14,7 +14,7 @@ const router = Router();
 // Create branch – only Admin
 router.post(
   "/create",
-  verifyToken(["Admin"]),
+  verifyToken(["Superadmin","Admin"]),
   createBranch
 );
 

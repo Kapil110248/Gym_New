@@ -49,10 +49,18 @@ model User {
   branchId  Int?
   role      Role     @relation(fields: [roleId], references: [id])
   branch    Branch?  @relation(fields: [branchId], references: [id])
+  gymName String?
+  address String?
+  planName String?
+  price String?
+  duration String?
+  description String?
+  status String?
 
   staffAttendances StaffAttendance[]//add
    classSchedules   ClassSchedule[] //add
    alerts Alert[]//add
+
 
   createdAt DateTime @default(now())
 }
