@@ -3,7 +3,8 @@ import {
   listMembersService,
   memberDetailService,
   updateMemberService,
-  deleteMemberService
+  deleteMemberService,
+  memberDetailByNameService
 } from "./member.service.js";
 
 export const createMember = async (req, res, next) => {
@@ -84,5 +85,25 @@ export const deleteMember = async (req, res, next) => {
 
   } catch (err) {
     next(err);
-  }
+  }
 };
+
+
+export const memberDetailByName = async (req, res, next) => {
+  try {
+    const name = req.params.name;  // coming from URL :name
+
+    const member = await memberDetailByNameService(name);
+
+    res.json({
+      success: true,
+      member
+    });
+
+  } catch (err) {
+    next(err);
+  }
+};
+
+
+

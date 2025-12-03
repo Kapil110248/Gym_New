@@ -54,14 +54,96 @@ model branch {
   user             user[]
 }
 
-model classschedule {
+
+
+model Member {
+  id             Int       @id @default(autoincrement())
+  fullName       String
+  email          String?   @unique
+  phone          String
+  gender         String?
+  age            Int?
+  address        String?
+  joinDate       DateTime  @default(now())
+  branchId       Int
+  planId         Int?
+  membershipFrom DateTime?
+  membershipTo   DateTime?
+
+  //new fields 
+   dob            String?
+  paymentMode    String?
+  interestedIn   String?
+  amountPaid     Int?
+
+  branch Branch  @relation(fields: [branchId], references: [id])
+  plan   Plan?   @relation(fields: [planId], references: [id])
+
+   attendances MemberAttendance[]//add
+   bookings     Booking[]  //add    
+   payments  Payment[]//add
+   alerts Alert[]//add
+   dietPlanAssignments DietPlanAssignment[]   // 🔥 new
+workoutPlanAssignments WorkoutPlanAssignment[]  // 🔥 new
+notificationLog  NotificationLog[]//add 
+
+}
+
+model Plan {
+  id          Int       @id @default(autoincrement())
+  name        String
+  category    String?   // optional category
+  description String?   // new field
+  status      String    @default("ACTIVE") // new field, default ACTIVE
+  duration    String
+  price       Float
+  createdAt   DateTime  @default(now())
+  members     Member[]
+  payments    Payment[]
+}
+
+
+
+model MemberAttendance {
+  id         Int       @id @default(autoincrement())
+  memberId   Int
+  branchId   Int
+  checkIn    DateTime  @default(now())
+  checkOut   DateTime?
+  createdAt  DateTime  @default(now()) // ✅ added
+
+  member     Member    @relation(fields: [memberId], references: [id])
+  branch     Branch    @relation(fields: [branchId], references: [id])
+}
+
+
+model StaffAttendance {
+  id         Int       @id @default(autoincrement())
+  staffId    Int
+  branchId   Int
+  checkIn    DateTime  @default(now())
+  checkOut   DateTime?
+
+  staff      User      @relation(fields: [staffId], references: [id])
+  branch     Branch    @relation(fields: [branchId], references: [id])
+}
+
+model ClassType {
+  id        Int       @id @default(autoincrement())
+  name      String
+  createdAt DateTime  @default(now())
+  schedules ClassSchedule[]
+}
+
+model ClassSchedule {
   id          Int       @id @default(autoincrement())
   branchId    Int
   classTypeId Int
   trainerId   Int
   date        DateTime
-  startTime   DateTime
-  endTime     DateTime
+  
+  startTime   String
+  endTime     String
   capacity    Int
   booking     booking[]
   branch      branch    @relation(fields: [branchId], references: [id], map: "ClassSchedule_branchId_fkey")
@@ -69,9 +151,13 @@ model classschedule {
  user        user      @relation(fields: [trainerId], references: [id], map: "ClassSchedule_trainerId_fkey")
 //  user        Staff     @relation(fields: [trainerId], references: [id], map: "ClassSchedule_trainerId_fkey")
 
-  @@index([branchId], map: "ClassSchedule_branchId_fkey")
-  @@index([classTypeId], map: "ClassSchedule_classTypeId_fkey")
-  @@index([trainerId], map: "ClassSchedule_trainerId_fkey")
+  classType   ClassType   @relation(fields: [classTypeId], references: [id])
+  trainer     User        @relation(fields: [trainerId], references: [id])
+  branch      Branch      @relation(fields: [branchId], references: [id])
+  bookings    Booking[]
+   members     Json? 
+     status      String     @default("Active")   // <-- added now
+     day     String?    
 }
 
 model classtype {

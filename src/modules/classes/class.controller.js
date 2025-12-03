@@ -5,7 +5,11 @@ import {
   listSchedulesService,
   bookClassService,
   cancelBookingService,
-  memberBookingsService
+  memberBookingsService,
+  getAllScheduledClassesService,
+  getScheduleByIdService,
+  updateScheduleService,
+  deleteScheduleService
 } from "./class.service.js";
 
 export const createClassType = async (req, res, next) => {
@@ -26,14 +30,37 @@ export const listClassTypes = async (req, res, next) => {
   }
 };
 
-export const createSchedule = async (req, res, next) => {
+// export const createSchedule = async (req, res, next) => {
+//   try {
+//     const r = await createScheduleService(req.body);
+//     res.json({ success: true, schedule: r });
+//   } catch (err) {
+//     next(err);
+//   }
+// };
+
+
+
+export const createSchedule = async (req, res) => {
   try {
-    const r = await createScheduleService(req.body);
-    res.json({ success: true, schedule: r });
-  } catch (err) {
-    next(err);
+    const schedule = await createScheduleService(req.body);
+
+    return res.status(201).json({
+      success: true,
+      message: "Class schedule created successfully!",
+      data: schedule,
+    });
+
+  } catch (error) {
+    console.error("Create Schedule Error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: error.message || "Something went wrong",
+    });
   }
 };
+
 
 export const listSchedules = async (req, res, next) => {
   try {
@@ -72,5 +99,120 @@ export const memberBookings = async (req, res, next) => {
     res.json({ success: true, bookings: r });
   } catch (err) {
     next(err);
+  }
+};
+
+
+
+// export const getAllScheduledClasses = async (req, res) => {
+//   try {
+//     const schedules = await getAllScheduledClassesService();
+
+//     return res.status(200).json({
+//       success: true,
+//       message: "All scheduled classes fetched successfully",
+//       data: schedules,
+//     });
+
+//   } catch (error) {
+//     console.error("Get All Scheduled Classes Error:", error);
+
+//     return res.status(500).json({
+//       success: false,
+//       message: error.message || "Something went wrong",
+//     });
+//   }
+// };
+
+
+export const getAllScheduledClasses = async (req, res) => {
+  try {
+    const schedules = await getAllScheduledClassesService();
+
+    return res.status(200).json({
+      success: true,
+      message: "Scheduled classes fetched successfully",
+      data: schedules,
+    });
+
+  } catch (error) {
+    console.error("Get All Scheduled Classes Error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: error.message || "Something went wrong",
+    });
+  }
+};
+
+
+
+
+export const getScheduleById = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const schedule = await getScheduleByIdService(id);
+
+    return res.status(200).json({
+      success: true,
+      message: "Class schedule fetched successfully",
+      data: schedule,
+    });
+
+  } catch (error) {
+    console.error("Get Schedule By ID Error:", error);
+
+    return res.status(404).json({
+      success: false,
+      message: error.message || "Something went wrong",
+    });
+  }
+};
+
+
+
+export const updateSchedule = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const updatedSchedule = await updateScheduleService(id, req.body);
+
+    return res.status(200).json({
+      success: true,
+      message: "Class schedule updated successfully",
+      data: updatedSchedule,
+    });
+
+  } catch (error) {
+    console.error("Update Schedule Error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: error.message || "Something went wrong",
+    });
+  }
+};
+
+
+
+export const deleteSchedule = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    await deleteScheduleService(id);
+
+    return res.status(200).json({
+      success: true,
+      message: "Scheduled class deleted successfully!",
+    });
+
+  } catch (error) {
+    console.error("Delete Schedule Error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: error.message || "Something went wrong",
+    });
   }
 };

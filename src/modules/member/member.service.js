@@ -129,5 +129,46 @@ export const deleteMemberService = async (id) => {
     where: { id },
   });
 
-  return true;
+  return true;
 };
+
+// export const memberDetailByNameService = async (name) => {
+//   const member = await prisma.member.findFirst({
+//     where: {
+//       fullName: {
+//         equals: name,
+        
+//       }
+//     },
+//     include: { 
+//       plan: true, 
+//       branch: true 
+//     },
+//   });
+
+//   if (!member) throw { status: 404, message: "Member not found" };
+
+//   return member;
+// };
+
+export const memberDetailByNameService = async (name) => {
+  const members = await prisma.member.findMany({
+    where: {
+      fullName: {
+        contains: name,
+        // mode: "insensitive"
+      }
+    },
+    include: {
+      plan: true,
+      branch: true
+    }
+  });
+
+  if (members.length === 0) {
+    throw { status: 404, message: "No members found" };
+  }
+
+  return members;
+};
+
