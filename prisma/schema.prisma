@@ -77,8 +77,8 @@ model Member {
   status            String   @default("ACTIVE")
 
 
-  branch Branch  @relation(fields: [branchId], references: [id])
-  plan   Plan?   @relation(fields: [planId], references: [id])
+  branch Branch @relation(fields: [branchId], references: [id])
+  plan   Plan?  @relation(fields: [planId], references: [id])
 
   attendances MemberAttendance[]
   bookings     Booking[]
