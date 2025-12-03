@@ -49,6 +49,7 @@ model branch {
   memberattendance memberattendance[]
   plan             plan[]
   product          product[]
+  session          session[]
   staffattendance  staffattendance[]
   user             user[]
 }
@@ -299,6 +300,8 @@ model user {
   alert           alert[]
   classschedule   classschedule[]
   staffattendance staffattendance[]
+  memberPlans     memberplan[]      @relation("UserMemberPlans")
+  session         session[]
   branch          branch?           @relation(fields: [branchId], references: [id], map: "User_branchId_fkey")
   role            role              @relation(fields: [roleId], references: [id], map: "User_roleId_fkey")
 //  staff           Staff //m. staff
@@ -364,15 +367,44 @@ enum plan_duration {
   Yearly
 }
 
-model Memberplan {
+model memberplan {
   id           Int      @id @default(autoincrement())
   name         String
   sessions     Int
   validityDays Int
-  price        Int
-  type         String?
+  price        Float
+  type         String   @default("GROUP")
+
+  // ✅ NEW
+  adminId      Int
+  admin        user     @relation("UserMemberPlans", fields: [adminId], references: [id])
+
   createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 }
+
+
+model session {
+  id          Int       @id @default(autoincrement())
+  sessionName String
+  trainerId   Int
+  branchId    Int
+  date        DateTime
+  time        String     // e.g. "10:00 AM" or "18:30"
+  duration    Int        // minutes ya hours – aapka logic ke hisaab se
+  description String?
+  status      String     @default("Upcoming") // Upcoming | Completed | Cancelled
+
+  // Relations
+  trainer     user       @relation(fields: [trainerId], references: [id], map: "Session_trainerId_fkey")
+  branch      branch     @relation(fields: [branchId], references: [id], map: "Session_branchId_fkey")
+
+  createdAt   DateTime   @default(now())
+
+  @@index([trainerId])
+  @@index([branchId])
+}
+
 
 
 enum branch_status {

@@ -49,7 +49,7 @@ router.put(
 
 // Delete branch (trash icon) – Admin
 router.delete(
-  "/:id",
+  "/:id", 
   verifyToken(["Admin"]),
   deleteBranch
 );

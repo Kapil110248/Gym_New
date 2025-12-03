@@ -8,7 +8,8 @@ import {
 
 export const createMemberPlan = async (req, res, next) => {
   try {
-    const data = await saveMemberPlan(req.body);
+    const adminId = req.user.id;  // ✅ admin id from token
+    const data = await saveMemberPlan(req.body, adminId);
     res.json({ success: true, plan: data });
   } catch (err) {
     next(err);
@@ -17,26 +18,43 @@ export const createMemberPlan = async (req, res, next) => {
 
 export const getMemberPlans = async (req, res, next) => {
   try {
-    const data = await getAllMemberPlans();
+    const { adminId } = req.query;          // ✅ yahan se lo
+
+    if (!adminId) {
+      return res
+        .status(400)
+        .json({ success: false, message: "adminId query param is required" });
+    }
+
+    const data = await getAllMemberPlans(adminId);
     res.json({ success: true, plans: data });
   } catch (err) {
     next(err);
   }
 };
 
+// 🔹 GET: /api/memberplan/2  => single plan by id
 export const getMemberPlan = async (req, res, next) => {
   try {
-    const data = await getMemberPlanById(Number(req.params.id));
+    const id = Number(req.params.id);
+    const data = await getMemberPlanById(id);
+
+    if (!data) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Plan not found" });
+    }
+
     res.json({ success: true, plan: data });
   } catch (err) {
     next(err);
   }
 };
 
-
 export const updatePlan = async (req, res, next) => {
   try {
-    const data = await updateMemberPlan(Number(req.params.id), req.body);
+    const adminId = req.user.id;
+    const data = await updateMemberPlan(Number(req.params.id), req.body, adminId);
 
     res.json({
       success: true,
@@ -48,10 +66,11 @@ export const updatePlan = async (req, res, next) => {
   }
 };
 
-
 export const deletePlan = async (req, res, next) => {
   try {
-    await deleteMemberPlan(Number(req.params.id));
+    const adminId = req.user.id;
+    await deleteMemberPlan(Number(req.params.id), adminId);
+
     res.json({ success: true, message: "Plan deleted successfully" });
   } catch (err) {
     next(err);
