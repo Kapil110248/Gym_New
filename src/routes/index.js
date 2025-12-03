@@ -26,7 +26,7 @@ import invoiceRoutes from "../modules/invoice/invoice.routes.js";
 import financeRoutes from "../modules/finance/finance.routes.js";
 import inventoryRoutes from "../modules/inventory/inventory.routes.js";
 import purchaseRoutes from "../modules/purchase/purchase.routes.js";
-
+import sessionRoutes from "../modules/session/session.routes.js";
 import  MemberPlan  from "../modules/memberplan/memberPlan.routes.js";
 
 
@@ -63,6 +63,7 @@ router.use("/invoices", invoiceRoutes);
 router.use("/inventory", inventoryRoutes);
 router.use("/purchases", purchaseRoutes); 
 router.use("/MemberPlan", MemberPlan); 
+router.use("/sessions", sessionRoutes);
 
 
 

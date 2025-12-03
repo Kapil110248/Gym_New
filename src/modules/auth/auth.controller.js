@@ -1,6 +1,6 @@
 import { registerUser, loginUser , fetchUserById,
   modifyUser,
-  removeUser, fetchAdmins, fetchDashboardStats} from "./auth.service.js";
+  removeUser, fetchAdmins, fetchDashboardStats, loginMemberService} from "./auth.service.js";
 
 
 
@@ -93,4 +93,25 @@ export const login = async (req, res, next) => {
   } catch (err) {
     next(err);
   }
+};
+
+
+export const loginMember = async (req, res, next) => {
+  try {
+    const data = await loginMemberService(req.body);
+    res.json({
+      success: true,
+      token: data.token,
+      member: {
+        id: data.member.id,
+        fullName: data.member.fullName,
+        email: data.member.email,
+        phone: data.member.phone,
+        branchId: data.member.branchId,
+        branchName: data.member.branch?.name || null,
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
 };

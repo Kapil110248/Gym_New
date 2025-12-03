@@ -1,39 +1,31 @@
+
+
+
 import {
   createMemberService,
   listMembersService,
   memberDetailService,
   updateMemberService,
   deleteMemberService,
-  memberDetailByNameService
 } from "./member.service.js";
 
 export const createMember = async (req, res, next) => {
   try {
     const m = await createMemberService(req.body);
-    res.json({ success: true, member: m });
+    res.json({ success: true, message: "Member created successfully", member: m });
   } catch (err) {
     next(err);
   }
 };
-
-// export const listMembers = async (req, res, next) => {
-//   try {
-//     const branchId = parseInt(req.params.branchId);
-//     const list = await listMembersService(branchId);
-//     res.json({ success: true, members: list });
-//   } catch (err) {
-//     next(err);
-//   }
-// };
-
 
 export const listMembers = async (req, res, next) => {
   try {
     const branchId = parseInt(req.params.branchId);
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 20;
+    const search = req.query.search || "";
 
-    const data = await listMembersService(branchId, page, limit);
+    const data = await listMembersService(branchId, page, limit, search);
     res.json({ success: true, ...data });
   } catch (err) {
     next(err);
@@ -50,60 +42,32 @@ export const memberDetail = async (req, res, next) => {
   }
 };
 
-// PUT /api/members/:id
-
 export const updateMember = async (req, res, next) => {
   try {
-    const memberId = Number(req.params.id);
+    const id = parseInt(req.params.id);
+    const data = req.body;
 
-    const updated = await updateMemberService(memberId, req.body);
-
+    const updated = await updateMemberService(id, data);
     res.json({
       success: true,
       message: "Member updated successfully",
-      member: updated
+      member: updated,
     });
-
   } catch (err) {
     next(err);
   }
 };
-
-
-
 
 export const deleteMember = async (req, res, next) => {
   try {
-    const id = Number(req.params.id);
+    const id = parseInt(req.params.id);
 
     await deleteMemberService(id);
-
     res.json({
       success: true,
-      message: "Member deleted successfully",
+      message: "Member deactivated successfully",
     });
-
   } catch (err) {
     next(err);
   }
 };
-
-
-export const memberDetailByName = async (req, res, next) => {
-  try {
-    const name = req.params.name;  // coming from URL :name
-
-    const member = await memberDetailByNameService(name);
-
-    res.json({
-      success: true,
-      member
-    });
-
-  } catch (err) {
-    next(err);
-  }
-};
-
-
-
