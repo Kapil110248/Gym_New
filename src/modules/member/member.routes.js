@@ -1,3 +1,5 @@
+
+
 import { Router } from "express";
 import {
   createMember,
@@ -5,37 +7,46 @@ import {
   memberDetail,
   updateMember,
   deleteMember,
-  memberDetailByName
 } from "./member.controller.js";
 import { verifyToken } from "../../middlewares/auth.js";
 
 const router = Router();
 
-/** Only Admin + Staff + Superadmin can create members */
+/** Create Member — Superadmin, Admin, Staff */
 router.post(
   "/create",
   verifyToken(["Superadmin", "Admin", "Staff"]),
   createMember
 );
 
-router.put("/update/:id", verifyToken(["Superadmin", "Admin", "Staff"]), updateMember);
-
-/** List members of a branch */
+/** List Members by Branch */
 router.get(
   "/branch/:branchId",
   verifyToken(["Superadmin", "Admin", "Staff"]),
   listMembers
 );
 
-/** Member detail */
+/** Get Member Detail */
 router.get(
   "/detail/:id",
   verifyToken(["Superadmin", "Admin", "Staff"]),
   memberDetail
 );
 
-router.get("/byName/:name", verifyToken(["Superadmin", "Admin", "Staff"]),memberDetailByName);
+/** Update Member */
+router.put(
+  "/update/:id",
+  verifyToken(["Superadmin", "Admin", "Staff"]),
+  updateMember
+);
 
-router.delete("/delete/:id", verifyToken(["Superadmin", "Admin", "Staff"]), deleteMember);
+/** Soft Delete / Deactivate Member */
+router.delete(
+  "/delete/:id",
+  verifyToken(["Superadmin", "Admin", "Staff"]),
+  deleteMember
+);
 
 export default router;
+
+

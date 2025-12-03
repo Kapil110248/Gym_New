@@ -58,38 +58,37 @@ model Branch {
 }
 
 model Member {
-  id             Int                     @id @default(autoincrement())
-  fullName       String
-  email          String?                 @unique
-  phone          String
-  gender         String?
-  age            Int?
-  address        String?
-  joinDate       DateTime                @default(now())
-  branchId       Int
-  planId         Int?
-  membershipFrom DateTime?
-  membershipTo   DateTime?
-  
-  dob            String?
-  paymentMode    String?
-  interestedIn   String?
-  amountPaid     Int?
+  id                Int       @id @default(autoincrement())
+  fullName          String
+  email             String?   @unique
+  password          String?
+  phone             String
+  gender            String?
+  dateOfBirth       DateTime?
+  interestedIn      String?
+  address           String?
+  joinDate          DateTime  @default(now())
+  branchId          Int
+  planId            Int?
+  membershipFrom    DateTime?
+  membershipTo      DateTime?
+  paymentMode       String?
+  amountPaid        Float?     // can store decimals
+  status            String   @default("ACTIVE")
+
 
   branch Branch @relation(fields: [branchId], references: [id])
   plan   Plan?  @relation(fields: [planId], references: [id])
 
-  attendances            MemberAttendance[]
-  bookings               Booking[]
-  payments               Payment[]
-  alerts                 Alert[]
-  dietPlanAssignments    DietPlanAssignment[]
-  workoutPlanAssignments WorkoutPlanAssignment[]
-  notificationLog        NotificationLog[]
-
-  @@index([branchId])
-  @@index([planId])
+  attendances MemberAttendance[]
+  bookings     Booking[]
+  payments     Payment[]
+  alerts       Alert[]
+  dietPlanAssignments      DietPlanAssignment[]   // new
+  workoutPlanAssignments   WorkoutPlanAssignment[]  // new
+  notificationLog          NotificationLog[]
 }
+
 
 model Plan {
   id             Int           @id @default(autoincrement())

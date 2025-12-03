@@ -64,6 +64,8 @@ export const registerUser = async (data) => {
   return user;
 };
 
+
+
 export const loginUser = async ({ email, password }) => {
   const user = await prisma.user.findUnique({
     where: { email },
@@ -170,6 +172,7 @@ export const fetchDashboardStats = async () => {
     }
   });
 
+
   return {
     // totalUsers,
     totalAdmins,
@@ -178,3 +181,30 @@ export const fetchDashboardStats = async () => {
   };
 };
 
+
+
+export const loginMemberService = async ({ email, password }) => {
+  const member = await prisma.member.findUnique({
+    where: { email },
+    include: { branch: true, plan: true },
+  });
+
+  if (!member) throw { status: 400, message: "Invalid email or password" };
+
+  if (member.status !== "ACTIVE") {
+    throw { status: 403, message: "Account disabled" };
+  }
+
+  // 🔥 Plain password compare (NO bcrypt)
+  if (member.password !== password) {
+    throw { status: 400, message: "Invalid email or password" };
+  }
+
+  const token = jwt.sign(
+    { id: member.id, role: "MEMBER" },
+    process.env.JWT_SECRET,
+    { expiresIn: "7d" }
+  );
+
+  return { token, member };
+};
