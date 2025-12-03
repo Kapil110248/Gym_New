@@ -8,23 +8,24 @@ export const saveMemberPlan = async (payload) => {
     throw { status: 400, message: "adminId is required" };
   }
 
-  return await prisma.memberplan.create({
+  return await prisma.memberPlan.create({
     data: {
       name: planName,
       sessions: Number(sessions),
       validityDays: Number(validity),
       price: Number(price),
       type: "GROUP",
-      adminId: Number(adminId),   // ✅ yahan save hoga
+      adminId: Number(adminId),
     },
   });
 };
+
 
 // GET ALL
 // GET ALL – particular admin ke saare plans
 // GET ALL – particular admin ke saare plans
 export const getAllMemberPlans = async (adminId) => {
-  return await prisma.memberplan.findMany({
+  return await prisma.memberPlan.findMany({
     where: {
       adminId: Number(adminId),
     },
@@ -33,9 +34,20 @@ export const getAllMemberPlans = async (adminId) => {
   });
 };
 
+
+export const getMemberPlans = async (req, res, next) => {
+  try {
+    const data = await getAllMemberPlans();
+    res.json({ success: true, plans: data });
+  } catch (err) {
+    next(err);
+  }
+};
+
+
 // GET BY ID – sirf id se
 export const getMemberPlanById = async (id) => {
-  return await prisma.memberplan.findUnique({
+  return await prisma.memberPlan.findUnique({
     where: { id },
     // include: { admin: true }, // agar admin ka data bhi chahiye ho to
   });
@@ -45,7 +57,7 @@ export const getMemberPlanById = async (id) => {
 
 // UPDATE
 export const updateMemberPlan = async (id, payload) => {
-  return await prisma.memberplan.update({
+  return await prisma.memberPlan.update({
     where: { id },
     data: {
       name: payload.planName,
@@ -59,7 +71,7 @@ export const updateMemberPlan = async (id, payload) => {
 
 // DELETE
 export const deleteMemberPlan = async (id) => {
-  return await prisma.memberplan.delete({
+  return await prisma.memberPlan.delete({
     where: { id }
   });
 };

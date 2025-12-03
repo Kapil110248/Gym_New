@@ -8,13 +8,22 @@ import {
 
 export const createMemberPlan = async (req, res, next) => {
   try {
-    const adminId = req.user.id;  // ✅ admin id from token
-    const data = await saveMemberPlan(req.body, adminId);
+    const data = await saveMemberPlan(req.body);
     res.json({ success: true, plan: data });
   } catch (err) {
     next(err);
   }
 };
+
+
+export const getMemberPlansnewss = async () => {
+  return await prisma.memberPlan.findMany({
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+};
+
 
 export const getMemberPlans = async (req, res, next) => {
   try {
