@@ -4,7 +4,7 @@ generator client {
 
 datasource db {
   provider = "mysql"
-  url       = env("DATABASE_URL")
+  url      = env("DATABASE_URL")
 }
 
 model Alert {
@@ -16,9 +16,9 @@ model Alert {
   branchId  Int
   createdAt DateTime @default(now())
 
-  branch Branch @relation(fields: [branchId], references: [id]) // FIX: branch -> Branch
-  member Member?  @relation(fields: [memberId], references: [id])
-  user   User?  @relation(fields: [staffId], references: [id])
+  branch Branch  @relation(fields: [branchId], references: [id]) // FIX: branch -> Branch
+  member Member? @relation(fields: [memberId], references: [id])
+  user   User?   @relation(fields: [staffId], references: [id])
 
   @@index([branchId])
   @@index([memberId])
@@ -26,10 +26,10 @@ model Alert {
 }
 
 model Booking {
-  id            Int           @id @default(autoincrement())
-  memberId      Int
-  scheduleId    Int
-  
+  id         Int @id @default(autoincrement())
+  memberId   Int
+  scheduleId Int
+
   member        Member        @relation(fields: [memberId], references: [id])
   classschedule ClassSchedule @relation(fields: [scheduleId], references: [id])
 
@@ -38,13 +38,13 @@ model Booking {
 }
 
 model Branch {
-  id               Int                @id @default(autoincrement())
-  name             String
-  phone            String?
-  createdAt        DateTime           @default(now())
-  address          String?
-  status           branch_status      @default(ACTIVE)
-  
+  id        Int           @id @default(autoincrement())
+  name      String
+  phone     String?
+  createdAt DateTime      @default(now())
+  address   String?
+  status    branch_status @default(ACTIVE)
+
   alert            Alert[]
   classschedule    ClassSchedule[]
   expense          Expense[]
@@ -53,91 +53,96 @@ model Branch {
   plan             Plan[]
   product          Product[]
   session          Session[]
-  staffattendance  StaffAttendance[]
   user             User[]
 }
 
 model Member {
-  id                Int       @id @default(autoincrement())
-  fullName          String
-  email             String?   @unique
-  password          String?
-  phone             String
-  gender            String?
-  dateOfBirth       DateTime?
-  interestedIn      String?
-  address           String?
-  joinDate          DateTime  @default(now())
-  branchId          Int
-  planId            Int?
-  membershipFrom    DateTime?
-  membershipTo      DateTime?
-  paymentMode       String?
-  amountPaid        Float?     // can store decimals
-  status            String   @default("ACTIVE")
-
+  id             Int       @id @default(autoincrement())
+  fullName       String
+  email          String?   @unique
+  password       String?
+  phone          String
+  gender         String?
+  dateOfBirth    DateTime?
+  interestedIn   String?
+  address        String?
+  joinDate       DateTime  @default(now())
+  branchId       Int
+  planId         Int?
+  membershipFrom DateTime?
+  membershipTo   DateTime?
+  paymentMode    String?
+  amountPaid     Float? // can store decimals
+  status         String    @default("ACTIVE")
 
   branch Branch @relation(fields: [branchId], references: [id])
   plan   Plan?  @relation(fields: [planId], references: [id])
 
-  attendances MemberAttendance[]
-  bookings     Booking[]
-  payments     Payment[]
-  alerts       Alert[]
-  dietPlanAssignments      DietPlanAssignment[]   // new
-  workoutPlanAssignments   WorkoutPlanAssignment[]  // new
-  notificationLog          NotificationLog[]
+  attendances            MemberAttendance[]
+  bookings               Booking[]
+  payments               Payment[]
+  alerts                 Alert[]
+  dietPlanAssignments    DietPlanAssignment[] // new
+  workoutPlanAssignments WorkoutPlanAssignment[] // new
+  notificationLog        NotificationLog[]
 }
 
-
 model Plan {
-  id             Int           @id @default(autoincrement())
-  name           String
-  duration       plan_duration
-  price          Float
-  createdAt      DateTime      @default(now())
-  
-  category       String?
-  description    String?
-  status         String        @default("ACTIVE")
-  branchId       Int?
-  sessions       Int           @default(0)
-  validityDays   Int           @default(0)
-  
-  members        Member[]
-  payments       Payment[]
-  branch         Branch?       @relation(fields: [branchId], references: [id])
+  id        Int           @id @default(autoincrement())
+  name      String
+  duration  plan_duration
+  price     Float
+  createdAt DateTime      @default(now())
+
+  category     String?
+  description  String?
+  status       String  @default("ACTIVE")
+  branchId     Int?
+  sessions     Int     @default(0)
+  validityDays Int     @default(0)
+
+  members  Member[]
+  payments Payment[]
+  branch   Branch?   @relation(fields: [branchId], references: [id])
 
   @@index([branchId])
 }
 
 model MemberAttendance {
-  id        Int      @id @default(autoincrement())
+  id        Int       @id @default(autoincrement())
   memberId  Int
   branchId  Int
-  checkIn   DateTime @default(now())
+  checkIn   DateTime  @default(now())
   checkOut  DateTime?
-  createdAt DateTime @default(now())
+  createdAt DateTime  @default(now())
 
-  member    Member   @relation(fields: [memberId], references: [id])
-  branch    Branch   @relation(fields: [branchId], references: [id]) // FIX: branch -> Branch
+  member Member @relation(fields: [memberId], references: [id])
+  branch Branch @relation(fields: [branchId], references: [id]) // FIX: branch -> Branch
 
   @@index([branchId])
   @@index([memberId])
 }
 
 model StaffAttendance {
-  id       Int       @id @default(autoincrement())
-  staffId  Int
-  branchId Int
-  checkIn  DateTime  @default(now())
-  checkOut DateTime?
+  id           Int              @id @default(autoincrement())
+  staffId      Int
+  staff        Staff            @relation(fields: [staffId], references: [id])
+  date         DateTime
+  checkinTime  DateTime?
+  checkoutTime DateTime?
+  mode         String
+  shiftId      String?
+  shiftName    String?
+  status       AttendanceStatus
+  notes        String?
+  createdById  Int
+  createdBy    User             @relation("attendanceCreatedBy", fields: [createdById], references: [id])
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
 
-  staff    User   @relation(fields: [staffId], references: [id])
-  branch   Branch @relation(fields: [branchId], references: [id]) // FIX: branch -> Branch
-  
-  @@index([branchId])
   @@index([staffId])
+  @@index([createdById])
+  @@index([date])
 }
 
 model ClassType {
@@ -148,24 +153,24 @@ model ClassType {
 }
 
 model ClassSchedule {
-  id            Int       @id @default(autoincrement())
-  branchId      Int
-  classTypeId   Int
-  trainerId     Int
-  date          DateTime
-  startTime     String
-  endTime       String
-  capacity      Int
-  
-  members       Json?
-  status        String    @default("Active")
-  day           String?
-  
-  bookings      Booking[]
+  id          Int      @id @default(autoincrement())
+  branchId    Int
+  classTypeId Int
+  trainerId   Int
+  date        DateTime
+  startTime   String
+  endTime     String
+  capacity    Int
 
-  branch        Branch    @relation(fields: [branchId], references: [id]) // FIX: branch -> Branch
-  classType     ClassType @relation(fields: [classTypeId], references: [id])
-  trainer       User      @relation(fields: [trainerId], references: [id])
+  members Json?
+  status  String  @default("Active")
+  day     String?
+
+  bookings Booking[]
+
+  branch    Branch    @relation(fields: [branchId], references: [id]) // FIX: branch -> Branch
+  classType ClassType @relation(fields: [classTypeId], references: [id])
+  trainer   User      @relation(fields: [trainerId], references: [id])
 
   @@index([branchId])
   @@index([classTypeId])
@@ -173,24 +178,24 @@ model ClassSchedule {
 }
 
 model DietMeal {
-  id         Int      @id @default(autoincrement())
+  id         Int    @id @default(autoincrement())
   dietPlanId Int
   time       String
   food       String
-  
-  dietplan   DietPlan @relation(fields: [dietPlanId], references: [id])
-  
+
+  dietplan DietPlan @relation(fields: [dietPlanId], references: [id])
+
   @@index([dietPlanId])
 }
 
 model DietPlan {
-  id                 Int                  @id @default(autoincrement())
-  title              String
-  notes              String?
-  createdBy          Int
-  branchId           Int
-  createdAt          DateTime             @default(now())
-  
+  id        Int      @id @default(autoincrement())
+  title     String
+  notes     String?
+  createdBy Int
+  branchId  Int
+  createdAt DateTime @default(now())
+
   dietmeal           DietMeal[]
   dietplanassignment DietPlanAssignment[]
 }
@@ -200,9 +205,9 @@ model DietPlanAssignment {
   dietPlanId Int
   memberId   Int
   assignedAt DateTime @default(now())
-  
-  dietplan   DietPlan @relation(fields: [dietPlanId], references: [id])
-  member     Member   @relation(fields: [memberId], references: [id])
+
+  dietplan DietPlan @relation(fields: [dietPlanId], references: [id])
+  member   Member   @relation(fields: [memberId], references: [id])
 
   @@index([dietPlanId])
   @@index([memberId])
@@ -217,8 +222,8 @@ model Expense {
   branchId  Int
   notes     String?
   createdAt DateTime @default(now())
-  
-  branch    Branch   @relation(fields: [branchId], references: [id]) // FIX: branch -> Branch
+
+  branch Branch @relation(fields: [branchId], references: [id]) // FIX: branch -> Branch
 
   @@index([branchId])
 }
@@ -231,8 +236,8 @@ model NotificationLog {
   status    String   @default("PENDING")
   createdAt DateTime @default(now())
   memberId  Int?
-  
-  member    Member?  @relation(fields: [memberId], references: [id])
+
+  member Member? @relation(fields: [memberId], references: [id])
 
   @@index([memberId])
 }
@@ -246,26 +251,26 @@ model Payment {
   invoiceNo   String   @unique
   gstAmount   Float?
   gstPercent  Float?
-  
-  member      Member   @relation(fields: [memberId], references: [id])
-  plan        Plan     @relation(fields: [planId], references: [id], onDelete: Cascade)
+
+  member Member @relation(fields: [memberId], references: [id])
+  plan   Plan   @relation(fields: [planId], references: [id], onDelete: Cascade)
 
   @@index([memberId])
   @@index([planId])
 }
 
 model Product {
-  id            Int             @id @default(autoincrement())
-  name          String
-  sku           String?         @unique
-  category      String?
-  sellingPrice  Float
-  costPrice     Float?
-  currentStock  Int             @default(0)
-  branchId      Int
-  isActive      Boolean         @default(true)
-  createdAt     DateTime        @default(now())
-  
+  id           Int      @id @default(autoincrement())
+  name         String
+  sku          String?  @unique
+  category     String?
+  sellingPrice Float
+  costPrice    Float?
+  currentStock Int      @default(0)
+  branchId     Int
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+
   branch        Branch          @relation(fields: [branchId], references: [id]) // FIX: branch -> Branch
   stockmovement StockMovement[]
 
@@ -287,8 +292,8 @@ model Role {
   id        Int      @id @default(autoincrement())
   name      String   @unique
   createdAt DateTime @default(now())
-  
-  user      User[]
+
+  user User[]
 }
 
 model StockMovement {
@@ -298,89 +303,90 @@ model StockMovement {
   quantity  Int
   note      String?
   createdAt DateTime @default(now())
-  
-  product   Product  @relation(fields: [productId], references: [id])
+
+  product Product @relation(fields: [productId], references: [id])
 
   @@index([productId])
 }
 
 model User {
-  id                Int                 @id @default(autoincrement())
-  fullName          String
-  email             String              @unique
-  password          String
-  phone             String?
-  roleId            Int
-  branchId          Int?
-  createdAt         DateTime            @default(now())
-  address           String?
-  description       String?
-  duration          String?
-  gymName           String?
-  planName          String?
-  price             String?
-  status            String?
-  
-  alert             Alert[]
-  classschedule     ClassSchedule[]
-  staffattendance   StaffAttendance[]
-  memberPlans       MemberPlan[]        @relation("UserMemberPlans")
-  session           Session[]
-  
-  branch            Branch?             @relation(fields: [branchId], references: [id]) // FIX: branch -> Branch
-  role              Role                @relation(fields: [roleId], references: [id])
-  staff             Staff?              @relation("UserStaff")
+  id          Int      @id @default(autoincrement())
+  fullName    String
+  email       String   @unique
+  password    String
+  phone       String?
+  roleId      Int
+  branchId    Int?
+  createdAt   DateTime @default(now())
+  address     String?
+  description String?
+  duration    String?
+  gymName     String?
+  planName    String?
+  price       String?
+  status      String?
+
+  alert               Alert[]
+  classschedule       ClassSchedule[]
+  memberPlans         MemberPlan[]      @relation("UserMemberPlans")
+  session             Session[]
+  attendanceCreatedBy StaffAttendance[] @relation("attendanceCreatedBy")
+
+  branch Branch? @relation(fields: [branchId], references: [id]) // FIX: branch -> Branch
+  role   Role    @relation(fields: [roleId], references: [id])
+  staff  Staff?  @relation("UserStaff")
 
   @@index([branchId])
   @@index([roleId])
 }
 
 model Staff {
-  id            Int      @id @default(autoincrement())
-  userId        Int      @unique
-  gender        String
-  dateOfBirth   DateTime
-  joinDate      DateTime
-  exitDate      DateTime?
-  profilePhoto  String?
-  status        String   @default("Active")
-  
-  user          User     @relation("UserStaff", fields: [userId], references: [id])
+  id           Int       @id @default(autoincrement())
+  userId       Int       @unique
+  gender       String
+  dateOfBirth  DateTime
+  joinDate     DateTime
+  exitDate     DateTime?
+  profilePhoto String?
+  status       String    @default("Active")
+
+  user            User              @relation("UserStaff", fields: [userId], references: [id])
+  staffAttendance StaffAttendance[]
 }
 
 model WorkoutExercise {
-  id            Int         @id @default(autoincrement())
+  id            Int     @id @default(autoincrement())
   workoutPlanId Int
   name          String
   sets          Int?
   reps          Int?
   duration      String?
-  
-  workoutplan   WorkoutPlan @relation(fields: [workoutPlanId], references: [id])
+
+  workoutplan WorkoutPlan @relation(fields: [workoutPlanId], references: [id])
 
   @@index([workoutPlanId])
 }
 
 model WorkoutPlan {
-  id                    Int                       @id @default(autoincrement())
-  title                 String
-  notes                 String?
-  createdBy             Int
-  branchId              Int
-  createdAt             DateTime                  @default(now())
-  
+  id        Int      @id @default(autoincrement())
+  title     String
+  notes     String?
+  createdBy Int
+  branchId  Int
+  createdAt DateTime @default(now())
+
   workoutexercise       WorkoutExercise[]
   workoutplanassignment WorkoutPlanAssignment[]
 }
 
 model WorkoutPlanAssignment {
-  id            Int           @id @default(autoincrement())
+  id            Int      @id @default(autoincrement())
   workoutPlanId Int
   memberId      Int
-  assignedAt    DateTime      @default(now())
-  
-  member        Member        @relation(fields: [memberId], references: [id])
-  workoutplan   WorkoutPlan   @relation(fields: [workoutPlanId], references: [id])
+  assignedAt    DateTime @default(now())
+
+  member      Member      @relation(fields: [memberId], references: [id])
+  workoutplan WorkoutPlan @relation(fields: [workoutPlanId], references: [id])
 
   @@index([memberId])
   @@index([workoutPlanId])
@@ -392,18 +398,18 @@ enum plan_duration {
 }
 
 model MemberPlan {
-  id           Int      @id @default(autoincrement())
+  id           Int    @id @default(autoincrement())
   name         String
   sessions     Int
   validityDays Int
   price        Float
-  type         String   @default("GROUP")
-  
-  adminId      Int
-  admin        User     @relation("UserMemberPlans", fields: [adminId], references: [id])
+  type         String @default("GROUP")
 
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  adminId Int
+  admin   User @relation("UserMemberPlans", fields: [adminId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Session {
@@ -417,13 +423,21 @@ model Session {
   description String?
   status      String   @default("Upcoming")
 
-  trainer     User     @relation(fields: [trainerId], references: [id])
-  branch      Branch   @relation(fields: [branchId], references: [id]) // FIX: branch -> Branch
+  trainer User   @relation(fields: [trainerId], references: [id])
+  branch  Branch @relation(fields: [branchId], references: [id]) // FIX: branch -> Branch
 
-  createdAt   DateTime @default(now())
+  createdAt DateTime @default(now())
 
   @@index([trainerId])
   @@index([branchId])
+}
+
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
+  LATE
+  HALF_DAY
+  OVERTIME
 }
 
 enum branch_status {
